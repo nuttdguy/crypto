@@ -221,7 +221,8 @@ public class CoinMarketCapAPI {
                 jsonObject.optInt(NUM_MARKET_PAIRS.label, 0),
                 jsonObject.optInt(CMC_RANK.label, 0),
                 LocalDateTime.parse(jsonObject.getString(LAST_UPDATED.label).replace("Z", "")),
-                tags;
+                tags
+        );
     }
 
 }
