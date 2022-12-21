@@ -1,5 +1,7 @@
 package org.crypto;
 
+import org.crypto.model.Quote;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +11,7 @@ public class Main {
         List<Quote> quotes = new ArrayList<>();
 
         try {
-            quotes = CoinMarketCapAPI.getLatestQuotes(5000);
+            quotes = CoinMarketCapAPI.getQuotes(1000, 1);
             CSVWriter.writeQuoteToCSV("crypto_quotes.csv", quotes);
         } catch(Exception ex) {
             ex.printStackTrace();
