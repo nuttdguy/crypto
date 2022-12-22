@@ -35,4 +35,5 @@ build/
 
 API_KEY.java
 *.xlsx
+*.csv
 
