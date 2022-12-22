@@ -1,4 +1,8 @@
-package org.crypto;
+package org.crypto.quote;
+
+import org.crypto.API_KEY;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -7,67 +11,20 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.crypto.model.Quote;
-import org.crypto.model.TokenInfo;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import static org.crypto.quote.QuoteLabel.*;
+import static org.crypto.quote.QuoteLabel.LAST_UPDATED;
 
-import static java.lang.System.out;
-import static org.crypto.enums.QuoteEnum.*;
+/* Coin Market Cap API options for v1 /listing & v2 /quotes endpoint */
+public class CmcQuoteApi {
 
-public class CoinMarketCapAPI {
     private static final String APIKEY = API_KEY.SECRET;
     private static final String BASE_URL = "https://pro-api.coinmarketcap.com/";
 
-    public static List<OHLCVRecord> getPriceHistory(String symbol, int limit) throws Exception {
-        String API_URL = "https://pro-api.coinmarketcap.com/v2/cryptocurrency/ohlcv/historical";
-
-        String urlString = API_URL + "?symbol=" + symbol + "&limit=" + limit;
-
-        URL url = new URL(urlString);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("X-CMC_PRO_API_KEY", APIKEY);
-
-        int responseCode = conn.getResponseCode();
-        if (responseCode != 200) {
-            throw new Exception("Failed to get price history: " + responseCode);
-        }
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        StringBuilder response = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            response.append(line);
-        }
-        reader.close();
-
-        JSONObject json = new JSONObject(response.toString());
-        JSONArray records = json.getJSONArray("data");
-
-        List<OHLCVRecord> result = new ArrayList<>();
-        for (int i = 0; i < records.length(); i++) {
-            JSONObject record = records.getJSONObject(i);
-            OHLCVRecord ohlcvRecord = new OHLCVRecord(
-                    record.getLong("timestamp"),
-                    record.getDouble("open"),
-                    record.getDouble("high"),
-                    record.getDouble("low"),
-                    record.getDouble("close"),
-                    record.getDouble("volume")
-            );
-            result.add(ohlcvRecord);
-        }
-
-        return result;
-    }
-
     /* Returns the latest market quote for 1 or more cryptocurrencies */
-    public static List<Quote> getQuotes(int limit, int version) {
+    public static List<QuoteDetail> getQuotes(int limit, int version) {
         // set min limit if 0 is passed in as value
         limit = limit == 0 ? 1 : limit;
         version = version != 1 ? 2 : version;
@@ -84,18 +41,18 @@ public class CoinMarketCapAPI {
         final String JSON_KEY_2 = "quote";
 
         // get the data from the resource
-        StringBuilder response = getResource(RESOURCE_ENDPOINT, RESOURCE_PARAMS);
+        StringBuilder apiResponse = fetchApiResource(RESOURCE_ENDPOINT, RESOURCE_PARAMS);
 
         // transform the response into a json object, extract the data from the data key
-        return toListFrom(response, version, JSON_KEY_1, JSON_KEY_2);
+        return toListFrom(apiResponse, version, JSON_KEY_1, JSON_KEY_2);
     }
 
     // to add -- swap string for array / list of keys
     /* compile a list of class instances from a json response */
-    private static List<Quote> toListFrom(StringBuilder response, int version, String jsonKey1, String jsonKey2) {
-        JSONObject jsonObject = new JSONObject(response.toString());
+    private static List<QuoteDetail> toListFrom(StringBuilder apiResponse, int version, String jsonKey1, String jsonKey2) {
+        JSONObject jsonObject = new JSONObject(apiResponse.toString());
         JSONArray jsonArray = jsonObject.getJSONArray(jsonKey1);
-        List<Quote> dataList = new ArrayList<>();
+        List<QuoteDetail> dataList = new ArrayList<>();
 
         for (int i = 0; i < jsonArray.length(); i++) {
 
@@ -104,15 +61,15 @@ public class CoinMarketCapAPI {
             JSONObject jsonQuote = jsonData.getJSONObject(jsonKey2);
 
             // transform json objects into java class instances
-            TokenInfo tokenInfo = toTokenInfo(jsonData, version);
-            Quote q = toQuote(tokenInfo, version, jsonQuote, "USD");
+            Quote quote = toQuote(jsonData, version);
+            QuoteDetail q = toQuoteDetail(quote, version, jsonQuote, "USD");
             dataList.add(q);
         }
         return dataList;
     }
 
     /* get data from the resource endpoint with params */
-    private static StringBuilder getResource(String resourceEndpoint, String resourceParams)  {
+    private static StringBuilder fetchApiResource(String resourceEndpoint, String resourceParams)  {
         // create url and open connection
         URL url;
         HttpURLConnection httpURLConnection;
@@ -149,12 +106,12 @@ public class CoinMarketCapAPI {
     }
 
     /* create an instance of quote from a json object */
-    private static Quote toQuote(TokenInfo tokenInfo, int version, JSONObject jsonObject, String currencyKey) {
+    private static QuoteDetail toQuoteDetail(Quote quote, int version, JSONObject jsonObject, String currencyKey) {
         JSONObject jsonQuote = jsonObject.getJSONObject(currencyKey);
 
         if (version == 1) {
-            return new Quote(
-                    tokenInfo,
+            return new QuoteDetail(
+                    quote,
                     jsonQuote.optDouble(PRICE.label, 0),
                     jsonQuote.optDouble(VOLUME_24.label, 0),
                     jsonQuote.optDouble(VOLUME_CHANGE_24.label, 0),
@@ -168,8 +125,8 @@ public class CoinMarketCapAPI {
         }
 
         // for api version 2
-        return new Quote(
-                tokenInfo,
+        return new QuoteDetail(
+                quote,
                 jsonQuote.optDouble(PRICE.label, 0),
                 jsonQuote.optDouble(VOLUME_24.label, 0),
                 jsonQuote.optDouble(VOLUME_CHANGE_24.label, 0),
@@ -180,19 +137,15 @@ public class CoinMarketCapAPI {
                 jsonQuote.optDouble(MARKET_CAP.label, 0),
                 jsonQuote.optInt(MARKET_CAP_DOMINANCE.label, 0),
                 jsonQuote.optDouble(FULLY_DILUTED_MARKET_CAP.label, 0),
-            LocalDateTime.parse(jsonQuote.getString("last_updated").replace("Z", "")));
+                LocalDateTime.parse(jsonQuote.getString("last_updated").replace("Z", "")));
     }
 
     /* create an instance of tokenInfo from a json object */
-    private static TokenInfo toTokenInfo(JSONObject jsonObject, int version) {
-        JSONArray jsonArray = jsonObject.getJSONArray(TAGS.label);
-
-        String[] tags = Stream.of(jsonArray)
-                .map(JSONArray::toString)
-                .toArray(String[]::new);
+    private static Quote toQuote(JSONObject jsonObject, int version) {
+        String[] tags = toArrayFrom(jsonObject.getJSONArray(TAGS.label));
 
         if (version == 1) {
-            return new TokenInfo(
+            return new Quote(
                     jsonObject.getInt(ID.label),
                     jsonObject.getString(NAME.label),
                     jsonObject.getString(SYMBOL.label),
@@ -208,7 +161,7 @@ public class CoinMarketCapAPI {
         }
 
         // for api version 2
-        return new TokenInfo(
+        return new Quote(
                 jsonObject.getInt(ID.label),
                 jsonObject.getString(NAME.label),
                 jsonObject.getString(SYMBOL.label),
@@ -223,6 +176,12 @@ public class CoinMarketCapAPI {
                 LocalDateTime.parse(jsonObject.getString(LAST_UPDATED.label).replace("Z", "")),
                 tags
         );
+    }
+
+    private static String[] toArrayFrom(JSONArray jsonArray) {
+        return Stream.of(jsonArray)
+                .map(JSONArray::toString)
+                .toArray(String[]::new);
     }
 
 }

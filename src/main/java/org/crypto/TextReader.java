@@ -1,5 +1,7 @@
 package org.crypto;
 
+import org.crypto.ohlcv.Ohlcv;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -9,11 +11,11 @@ import java.util.List;
 
 public class TextReader {
 
-    public static List<OHLCVRecord> readFromTextFile(String fileName) throws IOException {
+    public static List<Ohlcv> readFromTextFile(String fileName) throws IOException {
         String currentDirectory = System.getProperty("user.dir");
         String fullFileName = currentDirectory + File.separator + fileName;
 
-        List<OHLCVRecord> result = new ArrayList<>();
+        List<Ohlcv> result = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(fullFileName))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -24,8 +26,8 @@ public class TextReader {
                     double low = Double.parseDouble(reader.readLine().substring(5));
                     double close = Double.parseDouble(reader.readLine().substring(7));
                     double volume = Double.parseDouble(reader.readLine().substring(8));
-                    OHLCVRecord record = new OHLCVRecord(timestamp, open, high, low, close, volume);
-                    result.add(record);
+//                    Ohlcv record = new Ohlcv(timestamp, open, high, low, close, volume);
+//                    result.add(record);
                 }
             }
         }

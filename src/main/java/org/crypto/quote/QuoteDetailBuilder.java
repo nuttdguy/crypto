@@ -1,8 +1,8 @@
-package org.crypto.model;
+package org.crypto.quote;
 
 import java.time.LocalDateTime;
 
-public class TokenInfoBuilder {
+public class QuoteDetailBuilder {
     private int id;
     private String name;
     private String symbol;
@@ -17,72 +17,72 @@ public class TokenInfoBuilder {
     private LocalDateTime lastUpdated;
     private String[] tags;
 
-    public TokenInfoBuilder setId(int id) {
+    public QuoteDetailBuilder setId(int id) {
         this.id = id;
         return this;
     }
 
-    public TokenInfoBuilder setName(String name) {
+    public QuoteDetailBuilder setName(String name) {
         this.name = name;
         return this;
     }
 
-    public TokenInfoBuilder setSymbol(String symbol) {
+    public QuoteDetailBuilder setSymbol(String symbol) {
         this.symbol = symbol;
         return this;
     }
 
-    public TokenInfoBuilder setSlug(String slug) {
+    public QuoteDetailBuilder setSlug(String slug) {
         this.slug = slug;
         return this;
     }
 
-    public TokenInfoBuilder setIsActive(boolean isActive) {
+    public QuoteDetailBuilder setIsActive(boolean isActive) {
         this.isActive = isActive;
         return this;
     }
 
-    public TokenInfoBuilder setIsFiat(boolean isFiat) {
+    public QuoteDetailBuilder setIsFiat(boolean isFiat) {
         this.isFiat = isFiat;
         return this;
     }
 
-    public TokenInfoBuilder setCirculatingSupply(int circulatingSupply) {
+    public QuoteDetailBuilder setCirculatingSupply(int circulatingSupply) {
         this.circulatingSupply = circulatingSupply;
         return this;
     }
 
-    public TokenInfoBuilder setMaxSupply(int maxSupply) {
+    public QuoteDetailBuilder setMaxSupply(int maxSupply) {
         this.maxSupply = maxSupply;
         return this;
     }
 
-    public TokenInfoBuilder setDateAdded(LocalDateTime dateAdded) {
+    public QuoteDetailBuilder setDateAdded(LocalDateTime dateAdded) {
         this.dateAdded = dateAdded;
         return this;
     }
 
-    public TokenInfoBuilder setNumMarketPairs(int numMarketPairs) {
+    public QuoteDetailBuilder setNumMarketPairs(int numMarketPairs) {
         this.numMarketPairs = numMarketPairs;
         return this;
     }
 
-    public TokenInfoBuilder setRank(int rank) {
+    public QuoteDetailBuilder setRank(int rank) {
         this.rank = rank;
         return this;
     }
 
-    public TokenInfoBuilder setLastUpdated(LocalDateTime lastUpdated) {
+    public QuoteDetailBuilder setLastUpdated(LocalDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
         return this;
     }
 
-    public TokenInfoBuilder setTags(String[] tags) {
+    public QuoteDetailBuilder setTags(String[] tags) {
         this.tags = tags;
         return this;
     }
 
-    public TokenInfo createTokenInfo() {
-        return new TokenInfo(id, name, symbol, slug, isActive, isFiat, circulatingSupply, maxSupply, dateAdded, numMarketPairs, rank, lastUpdated, tags);
+    public Quote createTokenInfo() {
+        return new Quote(id, name, symbol, slug, isActive, isFiat, circulatingSupply, maxSupply, dateAdded, numMarketPairs, rank, lastUpdated, tags);
     }
 }

@@ -1,6 +1,7 @@
 package org.crypto;
 
-import org.crypto.model.Quote;
+import org.crypto.quote.CmcQuoteApi;
+import org.crypto.quote.QuoteDetail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +9,13 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        List<Quote> quotes = new ArrayList<>();
+        List<QuoteDetail> quoteDetails = new ArrayList<>();
 
         try {
-            quotes = CoinMarketCapAPI.getQuotes(1000, 1);
-            CSVWriter.writeQuoteToCSV("crypto_quotes.csv", quotes);
+            quoteDetails = CmcQuoteApi.getQuotes(1000, 1);
+            CSVWriter<QuoteDetail> quoteDetailCSVWriter = new CSVWriter<>();
+            quoteDetailCSVWriter.writeToCSV("crypto_quotes.csv", quoteDetails);
+
         } catch(Exception ex) {
             ex.printStackTrace();
         }

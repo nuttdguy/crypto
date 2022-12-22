@@ -1,9 +1,9 @@
-package org.crypto.model;
+package org.crypto.quote;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-public class TokenInfo {
+public class Quote {
 
     private int id;
     private String name;
@@ -19,37 +19,37 @@ public class TokenInfo {
     private LocalDateTime lastUpdated;
     private String[] tags;
 
-    public TokenInfo() {}
+    public Quote() {}
 
-    public TokenInfo(TokenInfo tokenInfo) {
-        this(tokenInfo.id,
-                tokenInfo.name,
-                tokenInfo.symbol,
-                tokenInfo.slug,
-                tokenInfo.isActive,
-                tokenInfo.isFiat,
-                tokenInfo.circulatingSupply,
-                tokenInfo.maxSupply,
-                tokenInfo.dateAdded,
-                tokenInfo.numMarketPairs,
-                tokenInfo.rank,
-                tokenInfo.lastUpdated,
-                tokenInfo.tags);
+    public Quote(Quote quote) {
+        this(quote.id,
+                quote.name,
+                quote.symbol,
+                quote.slug,
+                quote.isActive,
+                quote.isFiat,
+                quote.circulatingSupply,
+                quote.maxSupply,
+                quote.dateAdded,
+                quote.numMarketPairs,
+                quote.rank,
+                quote.lastUpdated,
+                quote.tags);
     }
 
-    public TokenInfo(int id,
-                     String name,
-                     String symbol,
-                     String slug,
-                     boolean isActive,
-                     boolean isFiat,
-                     int circulatingSupply,
-                     double maxSupply,
-                     LocalDateTime dateAdded,
-                     int numMarketPairs,
-                     int rank,
-                     LocalDateTime lastUpdated,
-                     String[] tags) {
+    public Quote(int id,
+                 String name,
+                 String symbol,
+                 String slug,
+                 boolean isActive,
+                 boolean isFiat,
+                 int circulatingSupply,
+                 double maxSupply,
+                 LocalDateTime dateAdded,
+                 int numMarketPairs,
+                 int rank,
+                 LocalDateTime lastUpdated,
+                 String[] tags) {
         this.id = id;
         this.name = name;
         this.symbol = symbol;
@@ -65,17 +65,17 @@ public class TokenInfo {
         this.tags = tags;
     }
 
-    public TokenInfo(int id,
-                     String name,
-                     String symbol,
-                     String slug,
-                     int rank,
-                     int numMarketPairs,
-                     int circulatingSupply,
-                     double maxSupply,
-                     LocalDateTime lastUpdated,
-                     LocalDateTime dateAdded,
-                     String[] tags) {
+    public Quote(int id,
+                 String name,
+                 String symbol,
+                 String slug,
+                 int rank,
+                 int numMarketPairs,
+                 int circulatingSupply,
+                 double maxSupply,
+                 LocalDateTime lastUpdated,
+                 LocalDateTime dateAdded,
+                 String[] tags) {
         this.id = id;
         this.name = name;
         this.symbol = symbol;
@@ -142,7 +142,7 @@ public class TokenInfo {
 
     @Override
     public String toString() {
-        return "TokenInfo{" +
+        return "Quote{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", symbol='" + symbol + '\'' +

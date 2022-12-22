@@ -1,8 +1,8 @@
-package org.crypto.model;
+package org.crypto.quote;
 
 import java.time.LocalDateTime;
 
-public class Quote extends TokenInfo {
+public class QuoteDetail extends Quote {
 
     private final double price;
     private final double volume24;
@@ -16,17 +16,17 @@ public class Quote extends TokenInfo {
     private final double fullyDilutedMarketCap;
     private final LocalDateTime lastUpdated;
 
-    public Quote(double price,
-                 double volume24,
-                 double volumeChange24,
-                 float percentChangeHr,
-                 float percentChange24,
-                 float percentChangeWk,
-                 float percentChange30Day,
-                 double marketCap,
-                 int marketCapDominance,
-                 double fullyDilutedMarketCap,
-                 LocalDateTime lastUpdated) {
+    public QuoteDetail(double price,
+                       double volume24,
+                       double volumeChange24,
+                       float percentChangeHr,
+                       float percentChange24,
+                       float percentChangeWk,
+                       float percentChange30Day,
+                       double marketCap,
+                       int marketCapDominance,
+                       double fullyDilutedMarketCap,
+                       LocalDateTime lastUpdated) {
         this(null,
                 price,
                 volume24,
@@ -41,19 +41,19 @@ public class Quote extends TokenInfo {
                 lastUpdated);
     }
 
-    public Quote(TokenInfo tokenInfo,
-                 double price,
-                 double volume24,
-                 double volumeChange24,
-                 float percentChangeHr,
-                 float percentChange24,
-                 float percentChangeWk,
-                 float percentChange30Day,
-                 double marketCap,
-                 int marketCapDominance,
-                 double fullyDilutedMarketCap,
-                 LocalDateTime lastUpdated) {
-        super(tokenInfo);
+    public QuoteDetail(Quote quote,
+                       double price,
+                       double volume24,
+                       double volumeChange24,
+                       float percentChangeHr,
+                       float percentChange24,
+                       float percentChangeWk,
+                       float percentChange30Day,
+                       double marketCap,
+                       int marketCapDominance,
+                       double fullyDilutedMarketCap,
+                       LocalDateTime lastUpdated) {
+        super(quote);
         this.price = price;
         this.volume24 = volume24;
         this.volumeChange24 = volumeChange24;
@@ -67,18 +67,18 @@ public class Quote extends TokenInfo {
         this.lastUpdated = lastUpdated;
     }
 
-    public Quote(TokenInfo tokenInfo,
-                 double price,
-                 double volume24,
-                 double volumeChange24,
-                 float percentChangeHr,
-                 float percentChange24,
-                 float percentChangeWk,
-                 double marketCap,
-                 int marketCapDominance,
-                 double fullyDilutedMarketCap,
-                 LocalDateTime lastUpdated) {
-        super(tokenInfo);
+    public QuoteDetail(Quote quote,
+                       double price,
+                       double volume24,
+                       double volumeChange24,
+                       float percentChangeHr,
+                       float percentChange24,
+                       float percentChangeWk,
+                       double marketCap,
+                       int marketCapDominance,
+                       double fullyDilutedMarketCap,
+                       LocalDateTime lastUpdated) {
+        super(quote);
         this.price = price;
         this.volume24 = volume24;
         this.volumeChange24 = volumeChange24;
@@ -138,7 +138,7 @@ public class Quote extends TokenInfo {
 
     @Override
     public String toString() {
-        return "Quote{" +
+        return "QuoteDetail{" +
                 "price=" + price +
                 ", volume24=" + volume24 +
                 ", volumeChange24=" + volumeChange24 +

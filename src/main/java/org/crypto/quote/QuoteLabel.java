@@ -1,6 +1,6 @@
-package org.crypto.enums;
+package org.crypto.quote;
 
-public enum QuoteEnum {
+public enum QuoteLabel {
     ID("id"),
     NAME("name"),
     SYMBOL("symbol"),
@@ -27,7 +27,7 @@ public enum QuoteEnum {
 
     public final String label;
 
-    private QuoteEnum(String label) {
+    private QuoteLabel(String label) {
         this.label = label;
     }
 }
