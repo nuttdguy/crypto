@@ -29,6 +29,7 @@ public class CSVWriter<T> {
         // get the current directory, append to the filename
         String currentDirectory = System.getProperty("user.dir");
         String fullFileName = currentDirectory + File.separator + fileName;
+        int lineCount = 0;
 
         // write the file the current user dir
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullFileName))) {
@@ -38,14 +39,29 @@ public class CSVWriter<T> {
             for (T generic : clazzList) {
                 String dataToWrite = "";
 
+                if (lineCount >= 501 && lineCount <= 550) {
+                    lineCount++;
+                    continue;
+                }
+
                 if (clazzName.contains("QuoteDetail")) {
                     dataToWrite = toStringFrom((QuoteDetail) generic);
                 }
 
+//                if (hasValidFieldValues(dataToWrite)) {
+//                    // todo verify all fields are of valid type, do not add if it is invalid
+//                }
+
                 writer.write(dataToWrite);
                 writer.newLine();
+                lineCount++;
             }
         }
+    }
+
+    private boolean hasValidFieldValues(String fieldValues) {
+        // todo implemnet
+        return true;
     }
 
 
