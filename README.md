@@ -11,6 +11,7 @@ Application consisting of modules to generate reports:
 - coinmarketcap
 - etherscan
 - bscscan
+- lunarcrush ??
 - include testing
 - additional resources tbd
 

@@ -1,5 +1,6 @@
 package org.crypto;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.time.LocalDateTime;
@@ -77,6 +78,12 @@ public class Util {
 
     public static Long toLong(String value) {
         return isLong(value) ? Long.parseLong(value) : 0L;
+    }
+
+    public static String[] toArrayFrom(JSONArray jsonArray) {
+        return Stream.of(jsonArray)
+                .map(JSONArray::toString)
+                .toArray(String[]::new);
     }
 
 }

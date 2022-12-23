@@ -15,12 +15,13 @@ import static java.lang.System.out;
 public class Main {
     public static void main(String[] args) {
         List<Quote> quoteList = new ArrayList<>();
+        CmcQuoteApi cmcQuoteApi = new CmcQuoteApi();
 
 //        List<BscTransaction> bscTransactions = new ArrayList<>();
 //        String[] labels = Stream.of(BscLabel.values()).map(e -> e.label).toArray(String[]::new);
 
         try {
-            quoteList = CmcQuoteApi.getQuotes(1000, 1);
+            quoteList = cmcQuoteApi.getQuotes(1000, 1);
             CSVWriter<Quote> quoteCSVWriter = new CSVWriter<>();
             quoteCSVWriter.writeToCSV("crypto_quotes.csv", quoteList);
 

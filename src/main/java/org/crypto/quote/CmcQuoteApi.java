@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.crypto.Util.toArrayFrom;
 import static org.crypto.quote.QuoteLabel.*;
 import static org.crypto.quote.QuoteLabel.LAST_UPDATED;
 
@@ -24,7 +25,7 @@ public class CmcQuoteApi {
     private static final String BASE_URL = "https://pro-api.coinmarketcap.com/";
 
     /* Returns the latest market quote for 1 or more cryptocurrencies */
-    public static List<Quote> getQuotes(int limit, int version) {
+    public List<Quote> getQuotes(int limit, int version) {
         // set min limit if 0 is passed in as value
         limit = limit == 0 ? 1 : limit;
         version = version == 1 ? 1 : 2;
@@ -54,7 +55,7 @@ public class CmcQuoteApi {
 
     // to add -- swap string for array / list of keys
     /* compile a list of class instances from a json response */
-    private static List<Quote> toListFrom(JSONArray jsonArray, int version) {
+    protected List<Quote> toListFrom(JSONArray jsonArray, int version) {
 
         List<Quote> dataList = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -70,7 +71,7 @@ public class CmcQuoteApi {
     }
 
     /* get data from the resource endpoint with params */
-    private static StringBuilder fetchApiResource(String resourceEndpoint, String resourceParams)  {
+    protected StringBuilder fetchApiResource(String resourceEndpoint, String resourceParams)  {
         // create url and open connection
         URL url;
         HttpURLConnection httpURLConnection;
@@ -107,18 +108,18 @@ public class CmcQuoteApi {
     }
 
     /* create an instance of quote from a json object */
-    private static Quote toQuote(JSONObject jsonDataObject, String currencyKey) {
+    protected Quote toQuote(JSONObject jsonDataObject, String currencyKey) {
         // extract the quote from within the jsonData object
         JSONObject jsonQuoteObject = jsonDataObject.getJSONObject("quote");
         JSONObject jsonQuote = jsonQuoteObject.getJSONObject(currencyKey);
 
-        // for api version 2
+
         return new Quote.QuoteBuilder()
                 .withId(jsonDataObject.optInt(ID.label, 0))
                 .withName(jsonDataObject.optString(NAME.label))
                 .withSymbol(jsonDataObject.optString(SYMBOL.label))
                 .withSlug(jsonDataObject.optString(SLUG.label))
-                .withActive(jsonDataObject.optBoolean(IS_ACTIVE.label, false))
+                .withActive(jsonDataObject.optBoolean(IS_ACTIVE.label, true))
                 .withFiat(jsonDataObject.optBoolean(IS_FIAT.label, false))
                 .withRank(jsonDataObject.optInt(CMC_RANK.label, 0))
                 .withNumMarketPairs(jsonDataObject.optInt(NUM_MARKET_PAIRS.label, 0))
@@ -138,12 +139,6 @@ public class CmcQuoteApi {
                 .withFullyDilutedMarketCap(jsonQuote.optDouble(FULLY_DILUTED_MARKET_CAP.label, 0.00))
                 .withLastUpdated(LocalDateTime.parse(jsonQuote.optString(LAST_UPDATED.label).replace("Z", "")))
                 .build();
-    }
-
-    private static String[] toArrayFrom(JSONArray jsonArray) {
-        return Stream.of(jsonArray)
-                .map(JSONArray::toString)
-                .toArray(String[]::new);
     }
 
 }
