@@ -24,10 +24,10 @@ public class CmcQuoteApi {
     private static final String BASE_URL = "https://pro-api.coinmarketcap.com/";
 
     /* Returns the latest market quote for 1 or more cryptocurrencies */
-    public static List<QuoteDetail> getQuotes(int limit, int version) {
+    public static List<Quote> getQuotes(int limit, int version) {
         // set min limit if 0 is passed in as value
         limit = limit == 0 ? 1 : limit;
-        version = version != 1 ? 2 : version;
+        version = version == 1 ? 1 : 2;
 
         // endpoint for quote resource; expected json keys for response
         // v2 requires one or more comma separated ids of the tokens
@@ -38,32 +38,33 @@ public class CmcQuoteApi {
         // set resource params and expected keys from the returns api response
         final String RESOURCE_PARAMS = "?limit=" + limit;
         final String JSON_KEY_1 = "data";
-        final String JSON_KEY_2 = "quote";
 
         // get the data from the resource
         StringBuilder apiResponse = fetchApiResource(RESOURCE_ENDPOINT, RESOURCE_PARAMS);
 
+        // convert the response into a JSON object
+        JSONObject jsonObject = new JSONObject(apiResponse.toString());
+
+        // get the data array element from the response; extract nested object by key
+        JSONArray jsonDataArray = jsonObject.getJSONArray(JSON_KEY_1);
+
         // transform the response into a json object, extract the data from the data key
-        return toListFrom(apiResponse, version, JSON_KEY_1, JSON_KEY_2);
+        return toListFrom(jsonDataArray, version);
     }
 
     // to add -- swap string for array / list of keys
     /* compile a list of class instances from a json response */
-    private static List<QuoteDetail> toListFrom(StringBuilder apiResponse, int version, String jsonKey1, String jsonKey2) {
-        JSONObject jsonObject = new JSONObject(apiResponse.toString());
-        JSONArray jsonArray = jsonObject.getJSONArray(jsonKey1);
-        List<QuoteDetail> dataList = new ArrayList<>();
+    private static List<Quote> toListFrom(JSONArray jsonArray, int version) {
 
+        List<Quote> dataList = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
 
-            // get the data array element from the response; extract nested object by key
-            JSONObject jsonData = jsonArray.getJSONObject(i);
-            JSONObject jsonQuote = jsonData.getJSONObject(jsonKey2);
-
             // transform json objects into java class instances
-            Quote quote = toQuote(jsonData, version);
-            QuoteDetail q = toQuoteDetail(quote, version, jsonQuote, "USD");
-            dataList.add(q);
+            JSONObject jsonDataObject = jsonArray.getJSONObject(i);
+
+            // feature to consider - handle multiple currency pairs
+            Quote quote = toQuote(jsonDataObject, "USD");
+            dataList.add(quote);
         }
         return dataList;
     }
@@ -106,76 +107,37 @@ public class CmcQuoteApi {
     }
 
     /* create an instance of quote from a json object */
-    private static QuoteDetail toQuoteDetail(Quote quote, int version, JSONObject jsonObject, String currencyKey) {
-        JSONObject jsonQuote = jsonObject.getJSONObject(currencyKey);
-
-        if (version == 1) {
-            return new QuoteDetail(
-                    quote,
-                    jsonQuote.optDouble(PRICE.label, 0),
-                    jsonQuote.optDouble(VOLUME_24.label, 0),
-                    jsonQuote.optDouble(VOLUME_CHANGE_24.label, 0),
-                    jsonQuote.optFloat(PERCENT_CHANGE_HR.label, 0),
-                    jsonQuote.optFloat(PERCENT_CHANGE_24.label, 0),
-                    jsonQuote.optFloat(PERCENT_CHANGE_7_DAY.label, 0),
-                    jsonQuote.optDouble(MARKET_CAP.label, 0),
-                    jsonQuote.optInt(MARKET_CAP_DOMINANCE.label, 0),
-                    jsonQuote.optDouble(FULLY_DILUTED_MARKET_CAP.label, 0),
-                    LocalDateTime.parse(jsonQuote.getString("last_updated").replace("Z", "")));
-        }
+    private static Quote toQuote(JSONObject jsonDataObject, String currencyKey) {
+        // extract the quote from within the jsonData object
+        JSONObject jsonQuoteObject = jsonDataObject.getJSONObject("quote");
+        JSONObject jsonQuote = jsonQuoteObject.getJSONObject(currencyKey);
 
         // for api version 2
-        return new QuoteDetail(
-                quote,
-                jsonQuote.optDouble(PRICE.label, 0),
-                jsonQuote.optDouble(VOLUME_24.label, 0),
-                jsonQuote.optDouble(VOLUME_CHANGE_24.label, 0),
-                jsonQuote.optFloat(PERCENT_CHANGE_HR.label, 0),
-                jsonQuote.optFloat(PERCENT_CHANGE_24.label, 0),
-                jsonQuote.optFloat(PERCENT_CHANGE_7_DAY.label, 0),
-                jsonQuote.optFloat(PERCENT_CHANGE_30_DAY.label, 0),
-                jsonQuote.optDouble(MARKET_CAP.label, 0),
-                jsonQuote.optInt(MARKET_CAP_DOMINANCE.label, 0),
-                jsonQuote.optDouble(FULLY_DILUTED_MARKET_CAP.label, 0),
-                LocalDateTime.parse(jsonQuote.getString("last_updated").replace("Z", "")));
-    }
-
-    /* create an instance of tokenInfo from a json object */
-    private static Quote toQuote(JSONObject jsonObject, int version) {
-        String[] tags = toArrayFrom(jsonObject.getJSONArray(TAGS.label));
-
-        if (version == 1) {
-            return new Quote(
-                    jsonObject.getInt(ID.label),
-                    jsonObject.getString(NAME.label),
-                    jsonObject.getString(SYMBOL.label),
-                    jsonObject.getString(SLUG.label),
-                    jsonObject.optInt(CMC_RANK.label, 0),
-                    jsonObject.optInt(NUM_MARKET_PAIRS.label, 0),
-                    jsonObject.optInt(CIRCULATING_SUPPLY.label, 0),
-                    jsonObject.optDouble(MAX_SUPPLY.label, 0),
-                    LocalDateTime.parse(jsonObject.getString(LAST_UPDATED.label).replace("Z", "")),
-                    LocalDateTime.parse(jsonObject.getString(DATE_ADDED.label).replace("Z", "")),
-                    tags
-            );
-        }
-
-        // for api version 2
-        return new Quote(
-                jsonObject.getInt(ID.label),
-                jsonObject.getString(NAME.label),
-                jsonObject.getString(SYMBOL.label),
-                jsonObject.getString(SLUG.label),
-                jsonObject.getBoolean(IS_ACTIVE.label),
-                jsonObject.getBoolean(IS_FIAT.label),
-                jsonObject.optInt(CIRCULATING_SUPPLY.label, 0),
-                jsonObject.optDouble(MAX_SUPPLY.label, 0),
-                LocalDateTime.parse(jsonObject.getString(DATE_ADDED.label).replace("Z", "")),
-                jsonObject.optInt(NUM_MARKET_PAIRS.label, 0),
-                jsonObject.optInt(CMC_RANK.label, 0),
-                LocalDateTime.parse(jsonObject.getString(LAST_UPDATED.label).replace("Z", "")),
-                tags
-        );
+        return new Quote.QuoteBuilder()
+                .withId(jsonDataObject.optInt(ID.label, 0))
+                .withName(jsonDataObject.optString(NAME.label))
+                .withSymbol(jsonDataObject.optString(SYMBOL.label))
+                .withSlug(jsonDataObject.optString(SLUG.label))
+                .withActive(jsonDataObject.optBoolean(IS_ACTIVE.label, false))
+                .withFiat(jsonDataObject.optBoolean(IS_FIAT.label, false))
+                .withRank(jsonDataObject.optInt(CMC_RANK.label, 0))
+                .withNumMarketPairs(jsonDataObject.optInt(NUM_MARKET_PAIRS.label, 0))
+                .withCirculatingSupply(jsonDataObject.optInt(CIRCULATING_SUPPLY.label, 0))
+                .withMaxSupply(jsonDataObject.optDouble(MAX_SUPPLY.label, 0.00))
+                .withLastUpdated(LocalDateTime.parse(jsonDataObject.getString(LAST_UPDATED.label).replace("Z", "")))
+                .withDateAdded(LocalDateTime.parse(jsonDataObject.getString(DATE_ADDED.label).replace("Z", "")))
+                .withTags(toArrayFrom(jsonDataObject.getJSONArray(TAGS.label)))
+                .withPrice(jsonQuote.optDouble(PRICE.label, 0.00))
+                .withVolume24(jsonQuote.optDouble(VOLUME_24.label, 0.00))
+                .withVolumeChange24(jsonQuote.optDouble(VOLUME_CHANGE_24.label, 0.00))
+                .withPercentChangeHr(jsonQuote.optFloat(PERCENT_CHANGE_HR.label))
+                .withPercentChange24(jsonQuote.optFloat(PERCENT_CHANGE_24.label))
+                .withPercentChangeWk(jsonQuote.optFloat(PERCENT_CHANGE_7_DAY.label))
+                .withMarketCap(jsonQuote.optDouble(MARKET_CAP.label, 0.00))
+                .withMarketCapDominance(jsonQuote.optInt(MARKET_CAP_DOMINANCE.label, 0))
+                .withFullyDilutedMarketCap(jsonQuote.optDouble(FULLY_DILUTED_MARKET_CAP.label, 0.00))
+                .withLastUpdated(LocalDateTime.parse(jsonQuote.optString(LAST_UPDATED.label).replace("Z", "")))
+                .build();
     }
 
     private static String[] toArrayFrom(JSONArray jsonArray) {

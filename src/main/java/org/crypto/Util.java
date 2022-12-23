@@ -1,5 +1,9 @@
 package org.crypto;
 
+import org.json.JSONObject;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.stream.Stream;
 
 public class Util {
@@ -22,6 +26,16 @@ public class Util {
         }
     }
 
+    public static boolean isLong(String value) {
+        try {
+            Long.parseLong(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+
     public static boolean isFloat(String value) {
         try {
             Float.parseFloat(value);
@@ -31,10 +45,38 @@ public class Util {
         }
     }
 
+    public static boolean isLocalDateTime(String localDateTime) {
+        try {
+            LocalDateTime.parse(localDateTime);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
+
     public static String[] toArray(String s) {
         return Stream.of(s.split(",")).toArray(String[]::new);
     }
 
+    public static LocalDateTime toDateTime(String dateTime) {
+        String dt = dateTime.replace(" ", "T");
+        return isLocalDateTime(dt) ? LocalDateTime.parse(dt) : LocalDateTime.now();
+    }
 
+    public static  Double toDouble(String value) {
+        return isDouble(value) ? Double.parseDouble(value) : 0.00;
+    }
+
+    public static Integer toInteger(String value) {
+        return isInt(value) ? Integer.parseInt(value) : 0;
+    }
+
+    public static Float toFloat(String value) {
+        return isFloat(value) ? Float.parseFloat(value) : 0.00f;
+    }
+
+    public static Long toLong(String value) {
+        return isLong(value) ? Long.parseLong(value) : 0L;
+    }
 
 }

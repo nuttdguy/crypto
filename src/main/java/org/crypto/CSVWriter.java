@@ -1,7 +1,6 @@
 package org.crypto;
 
 import org.crypto.quote.Quote;
-import org.crypto.quote.QuoteDetail;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CSVWriter<T> {
 
@@ -16,6 +17,7 @@ public class CSVWriter<T> {
         // nothing to implement
     }
 
+    /* Write */
     public void writeToCSV(String fileName, List<T> clazzList) throws IOException {
 
         // return when list is empty
@@ -29,59 +31,30 @@ public class CSVWriter<T> {
         // get the current directory, append to the filename
         String currentDirectory = System.getProperty("user.dir");
         String fullFileName = currentDirectory + File.separator + fileName;
-        int lineCount = 0;
 
         // write the file the current user dir
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullFileName))) {
 
             writer.write(fields);
             writer.newLine();
-            for (T generic : clazzList) {
+            for (T clazz : clazzList) {
                 String dataToWrite = "";
 
-                if (lineCount >= 501 && lineCount <= 550) {
-                    lineCount++;
-                    continue;
+                if (clazzName.contains("Quote")) {
+                    dataToWrite = toStringFrom((Quote) clazz);
                 }
-
-                if (clazzName.contains("QuoteDetail")) {
-                    dataToWrite = toStringFrom((QuoteDetail) generic);
-                }
-
-//                if (hasValidFieldValues(dataToWrite)) {
-//                    // todo verify all fields are of valid type, do not add if it is invalid
-//                }
 
                 writer.write(dataToWrite);
                 writer.newLine();
-                lineCount++;
             }
         }
     }
 
-    private boolean hasValidFieldValues(String fieldValues) {
-        // todo implemnet
-        return true;
-    }
 
-
-    private String toStringFrom(QuoteDetail quoteDetail) {
-        return this.toStringFromQuote(quoteDetail) + "," +
-                quoteDetail.getPrice() + "," +
-                quoteDetail.getVolume24() + "," +
-                quoteDetail.getVolumeChange24() + "," +
-                quoteDetail.getPercentChangeHr() + "," +
-                quoteDetail.getPercentChange24() + "," +
-                quoteDetail.getPercentChangeWk() + "," +
-                quoteDetail.getPercentChange30Day() + "," +
-                quoteDetail.getMarketCap() + "," +
-                quoteDetail.getMarketCapDominance() + "," +
-                quoteDetail.getFullyDilutedMarketCap() + "," +
-                quoteDetail.getLastUpdated();
-    }
-
-    private String toStringFromQuote(Quote quote) {
-        String tags = Arrays.toString(quote.getTags()).replace(",", "::");
+    private String toStringFrom(Quote quote) {
+        String tags = Stream.of(quote.getTags())
+                .map(tag -> tag.replace(",", "::"))
+                .collect(Collectors.joining(""));
 
         return quote.getId() + "," +
                 quote.getName() + "," +
@@ -95,7 +68,18 @@ public class CSVWriter<T> {
                 quote.getNumMarketPairs() + "," +
                 quote.getRank() + "," +
                 quote.getLastUpdated() + "," +
-                tags;
+                tags + "," +
+                quote.getPrice() + "," +
+                quote.getVolume24() + "," +
+                quote.getVolumeChange24() + "," +
+                quote.getPercentChangeHr() + "," +
+                quote.getPercentChange24() + "," +
+                quote.getPercentChangeWk() + "," +
+                quote.getPercentChange30Day() + "," +
+                quote.getMarketCap() + "," +
+                quote.getMarketCapDominance() + "," +
+                quote.getFullyDilutedMarketCap() + "," +
+                quote.getLastUpdated();
     }
 
 }

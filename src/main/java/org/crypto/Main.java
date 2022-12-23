@@ -1,9 +1,8 @@
 package org.crypto;
 
 import org.crypto.bsc.BscLabel;
-import org.crypto.bsc.BscTransaction;
 import org.crypto.quote.CmcQuoteApi;
-import org.crypto.quote.QuoteDetail;
+import org.crypto.quote.Quote;
 import org.crypto.quote.QuoteTransaction;
 
 import java.util.ArrayList;
@@ -15,14 +14,15 @@ import static java.lang.System.out;
 
 public class Main {
     public static void main(String[] args) {
-        List<QuoteDetail> quoteDetails = new ArrayList<>();
+        List<Quote> quoteList = new ArrayList<>();
+
 //        List<BscTransaction> bscTransactions = new ArrayList<>();
-        String[] labels = Stream.of(BscLabel.values()).map(e -> e.label).toArray(String[]::new);
+//        String[] labels = Stream.of(BscLabel.values()).map(e -> e.label).toArray(String[]::new);
 
         try {
-//            quoteDetails = CmcQuoteApi.getQuotes(1000, 1);
-//            CSVWriter<QuoteDetail> quoteDetailCSVWriter = new CSVWriter<>();
-//            quoteDetailCSVWriter.writeToCSV("crypto_quotes.csv", quoteDetails);
+            quoteList = CmcQuoteApi.getQuotes(1000, 1);
+            CSVWriter<Quote> quoteCSVWriter = new CSVWriter<>();
+            quoteCSVWriter.writeToCSV("crypto_quotes.csv", quoteList);
 
             // extract transaction data from bsc explorer csv file
 //            CSVReader<BscTransaction> bscTransactionCSVReader = new CSVReader<>();
