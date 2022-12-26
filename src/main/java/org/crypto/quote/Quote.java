@@ -11,11 +11,11 @@ public class Quote {
     private String slug;
     private boolean isActive;
     private boolean isFiat;
-    private int circulatingSupply;
+    private double circulatingSupply;
     private double maxSupply;
     private LocalDateTime dateAdded;
     private int numMarketPairs;
-    private int rank;
+    private double rank;
     private LocalDateTime lastUpdated;
     private String[] tags;
     private double price;
@@ -26,7 +26,7 @@ public class Quote {
     private float percentChangeWk;
     private float percentChange30Day;
     private double marketCap;
-    private int marketCapDominance;
+    private double marketCapDominance;
     private double fullyDilutedMarketCap;
     private LocalDateTime lastUpdatedQuote;
 
@@ -41,11 +41,11 @@ public class Quote {
         private String slug;
         private boolean isActive;
         private boolean isFiat;
-        private int circulatingSupply;
+        private double circulatingSupply;
         private double maxSupply;
         private LocalDateTime dateAdded;
         private int numMarketPairs;
-        private int rank;
+        private double rank;
         private LocalDateTime lastUpdated;
         private String[] tags;
         private double price;
@@ -56,7 +56,7 @@ public class Quote {
         private float percentChangeWk;
         private float percentChange30Day;
         private double marketCap;
-        private int marketCapDominance;
+        private double marketCapDominance;
         private double fullyDilutedMarketCap;
         private LocalDateTime lastUpdatedQuote;
 
@@ -90,7 +90,7 @@ public class Quote {
             return this;
         }
 
-        public QuoteBuilder withCirculatingSupply(int circulatingSupply) {
+        public QuoteBuilder withCirculatingSupply(double circulatingSupply) {
             this.circulatingSupply = circulatingSupply;
             return this;
         }
@@ -110,7 +110,7 @@ public class Quote {
             return this;
         }
 
-        public QuoteBuilder withRank(int rank) {
+        public QuoteBuilder withRank(double rank) {
             this.rank = rank;
             return this;
         }
@@ -165,7 +165,7 @@ public class Quote {
             return this;
         }
 
-        public QuoteBuilder withMarketCapDominance(int marketCapDominance) {
+        public QuoteBuilder withMarketCapDominance(double marketCapDominance) {
             this.marketCapDominance = marketCapDominance;
             return this;
         }
@@ -234,7 +234,7 @@ public class Quote {
         return isFiat;
     }
 
-    public int getCirculatingSupply() {
+    public double getCirculatingSupply() {
         return circulatingSupply;
     }
 
@@ -250,7 +250,7 @@ public class Quote {
         return numMarketPairs;
     }
 
-    public int getRank() {
+    public double getRank() {
         return rank;
     }
 
@@ -294,7 +294,7 @@ public class Quote {
         return marketCap;
     }
 
-    public int getMarketCapDominance() {
+    public double getMarketCapDominance() {
         return marketCapDominance;
     }
 

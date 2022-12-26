@@ -1,7 +1,6 @@
 package org.crypto;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -55,6 +54,10 @@ public class Util {
         }
     }
 
+    public static boolean isBoolean(String value) {
+        return Boolean.parseBoolean(value);
+    }
+
     public static String[] toArray(String s) {
         return Stream.of(s.split(",")).toArray(String[]::new);
     }
@@ -62,6 +65,10 @@ public class Util {
     public static LocalDateTime toDateTime(String dateTime) {
         String dt = dateTime.replace(" ", "T");
         return isLocalDateTime(dt) ? LocalDateTime.parse(dt) : LocalDateTime.now();
+    }
+
+    public static Boolean toBoolean(String value) {
+        return isBoolean(value);
     }
 
     public static  Double toDouble(String value) {
@@ -84,6 +91,13 @@ public class Util {
         return Stream.of(jsonArray)
                 .map(JSONArray::toString)
                 .toArray(String[]::new);
+    }
+
+    public static String[] toArrayFrom(String str) {
+        if (str.isEmpty()) {
+            return new String[1];
+        }
+        return str.split("::");
     }
 
 }
