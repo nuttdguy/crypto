@@ -6,6 +6,8 @@ import org.crypto.bsc.account.BscAccountConfig;
 import org.crypto.quote.Quote;
 import org.crypto.quote.QuoteConfig;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 
@@ -40,15 +42,29 @@ public class Main {
         BscApi bscApi = new BscApi();
         BscAccountConfig config = new BscAccountConfig
                 .AccountConfigBuilder()
-                .build("txlist", "0x1c93ba02fcf68fd9bee9e1a15a21495beaf36ad5");
+                .build("txlist", API_KEY.BSC_ADDRESS);
 
-        List<BscAccount> accountEntries = bscApi.fetchBscAccount(config);
+
+        List<BscAccount> accountEntries;
+        try (InputStream accountStream = bscApi.fetchBscAccount(config)) {
+            // create a list from the returned resource stream
+            accountEntries = bscApi.createListFrom(accountStream, "result");
+
+            // write account entries to a csv file
+            toCsvFrom(accountEntries, "bsc_account.csv");
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
+    public static void toCsvFrom(List<BscAccount> accountEntries, String fileName) {
 
         // write BscAccount results to a file
         CSVWriter<BscAccount> quoteCSVWriter = new CSVWriter<>();
         try {
-            quoteCSVWriter.writeToCSV("bsc_account.csv", accountEntries);
-
+            quoteCSVWriter.writeToCSV(fileName, accountEntries);
         } catch(Exception ex) {
             ex.printStackTrace();
         }

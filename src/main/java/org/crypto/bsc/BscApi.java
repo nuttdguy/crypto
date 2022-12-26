@@ -4,8 +4,10 @@ import org.crypto.bsc.account.BscAccount;
 import org.crypto.bsc.account.BscAccountConfig;
 import org.crypto.bsc.account.BscAccountService;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,40 +26,45 @@ public class BscApi {
 
     private final BscAccountService bscAccountService = new BscAccountService();
 
-    public List<BscAccount> fetchBscAccount(BscAccountConfig bscAccountConfig) {
+    /* fetch the resource */
+    public InputStream fetchBscAccount(BscAccountConfig bscAccountConfig) throws IOException {
+        // retrieve response as input stream from api
+        return bscAccountService.fetchApiResource(bscAccountConfig.getResourceUrl(), bscAccountConfig.getParamString(), bscAccountConfig.getApikey());
+    }
+
+    /* from resource, extract the data into a list of bsc account instances
+    * throws JSONException if the resourceKey does not exist
+    * throws IOException when resourceStream cannot be converted to a JsonObject
+    * */
+    public List<BscAccount> createListFrom(InputStream resourceStream, String resourceKey) throws JSONException, IOException {
         List<BscAccount> accountEntries = new ArrayList<>();
 
-        try {
-            // retrieve response as input stream from api
-            InputStream resourceInputStream =
-                    bscAccountService.fetchApiResource(bscAccountConfig.getResourceUrl(), bscAccountConfig.getParamString(), bscAccountConfig.getApikey());
+        // transform response into desired format, i.e. string, json, etc
+        JSONObject resource = toJsonObject(resourceStream);
 
-            // transform response into desired format, i.e. string, json, etc
-            JSONObject resource = toJsonObject(resourceInputStream);
+        // extract the data array from the json object
+        JSONArray resourceArray = resource.getJSONArray(resourceKey);
 
-            // extract the data array from the json object
-            JSONArray resourceArray = resource.getJSONArray("result");
+        for (int i = 0; i < resourceArray.length(); i++) {
 
-            for (int i = 0; i < resourceArray.length(); i++) {
-
-                // if results is valid, extract all the keys and value types
-                Map<String, Object> keyPairs =
-                        extractKeyPairs(resourceArray.getJSONObject(i), new HashMap<>(), true);
-
-                // extract all values into String values
-                Map<String, String> keyValuePairs = mapObjectsToString(keyPairs);
-
-                // map key & value pairs into list of class instances
-                accountEntries.add(bscAccountService.toAccountFromMap(keyValuePairs));
-
-            }
-
-        } catch(Exception ex) {
-            ex.printStackTrace();
+            // create and then add bsc account instance
+            accountEntries.add(createAccountEntry(resourceArray.getJSONObject(i)));
         }
-
         return accountEntries;
-
     }
+
+    /* creates an instance of bscAccount  */
+    private BscAccount createAccountEntry(JSONObject accountEntry) {
+        // if results is valid, extract all the keys and value types
+        Map<String, Object> keyPairs =
+                extractKeyPairs(accountEntry, new HashMap<>(), true);
+
+        // extract all values into String values
+        Map<String, String> keyValuePairs = mapObjectsToString(keyPairs);
+
+        // map key & value pairs into list of class instances
+        return bscAccountService.toAccountFromMap(keyValuePairs);
+    }
+
 
 }
