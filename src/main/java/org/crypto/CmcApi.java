@@ -1,6 +1,6 @@
 package org.crypto;
 
-import org.crypto.quote.CmcQuoteService;
+import org.crypto.quote.QuoteService;
 import org.crypto.quote.Quote;
 import org.crypto.quote.QuoteConfig;
 import org.json.JSONArray;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 /* class to execute api requests to retrieve data from https://coinmarketcap.com */
 public class CmcApi {
-    private static final CmcQuoteService cmcQuoteService = new CmcQuoteService();
+    private static final QuoteService QUOTE_SERVICE = new QuoteService();
 
     private CmcApi() { /* no impl */}
 
@@ -25,10 +25,10 @@ public class CmcApi {
         try {
             // retrieve response as input stream from api
             InputStream resourceInputStream =
-                    cmcQuoteService.fetchApiResource(quoteConfig.getResourceUrl(), quoteConfig.getParamString(), quoteConfig.getAPIKey());
+                    QUOTE_SERVICE.fetchApiResource(quoteConfig.getResourceUrl(), quoteConfig.getParamString(), quoteConfig.getAPIKey());
 
             // transform response into desired format, i.e. string, json, etc
-            JSONObject resource = cmcQuoteService.toJsonObject(resourceInputStream);
+            JSONObject resource = QUOTE_SERVICE.toJsonObject(resourceInputStream);
 
             // extract the data array from the json object
             JSONArray resourceArray = resource.getJSONArray("data");
@@ -36,13 +36,13 @@ public class CmcApi {
 
                 // extract all the keys and types
                 Map<String, Object> keyPairs =
-                        cmcQuoteService.extractKeyPairs(resourceArray.getJSONObject(i), new HashMap<>(), true);
+                        QUOTE_SERVICE.extractKeyPairs(resourceArray.getJSONObject(i), new HashMap<>(), true);
 
                 // extract all values into String values
-                Map<String, String> keyValuePairs = cmcQuoteService.mapObjectsToString(keyPairs);
+                Map<String, String> keyValuePairs = QUOTE_SERVICE.mapObjectsToString(keyPairs);
 
                 // map key & value pairs into list of class instances
-                quoteList.add(cmcQuoteService.toQuoteFromMap(keyValuePairs));
+                quoteList.add(QUOTE_SERVICE.toQuoteFromMap(keyValuePairs));
 
             }
 

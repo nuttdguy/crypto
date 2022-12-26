@@ -17,7 +17,7 @@ import static org.crypto.quote.QuoteLabel.*;
 import static org.crypto.quote.QuoteLabel.LAST_UPDATED;
 
 /* Coin Market Cap API options for v1 /listing & v2 /quotes endpoint */
-public class CmcQuoteService {
+public class QuoteService {
 
     /* fetch and get the data from the resource endpoint with params
     *  endpoint for quote resource; v2/cryptocurrency/quotes/latest, v1/cryptocurrency/listings/latest
