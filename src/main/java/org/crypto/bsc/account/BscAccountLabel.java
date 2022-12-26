@@ -21,7 +21,10 @@ public enum BscAccountLabel {
     CUMULATIVE_GAS_USED("cumulativeGasUsed"),
     GAS_USED("gasUsed"),
     CONFIRMATIONS("confirmations"),
-    METHOD_ID("methodId");
+    METHOD_ID("methodId"),
+    TOKEN_NAME("tokenName"),
+    TOKEN_SYMBOL("tokenSymbol"),
+    TOKEN_DECIMAL("tokenDecimal");
 
     public final String label;
 

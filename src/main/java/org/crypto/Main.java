@@ -38,20 +38,25 @@ public class Main {
     }
 
     public static void fetchBscAccount() {
+        String txlistinternal = "txlistinternal";
+        String txlist = "txlist";
+        String tokentx = "tokentx";
+        String txListInternalFileName = "bsc_account_internal.csv";
+        String tokenTxFileName = "bsc_account_tokentx.csv";
         // fetch latest quotes
         BscApi bscApi = new BscApi();
         BscAccountConfig config = new BscAccountConfig
                 .AccountConfigBuilder()
-                .build("txlist", API_KEY.BSC_ADDRESS);
+                .build(tokentx, API_KEY.BSC_ADDRESS);
 
 
         List<BscAccount> accountEntries;
         try (InputStream accountStream = bscApi.fetchBscAccount(config)) {
             // create a list from the returned resource stream
-            accountEntries = bscApi.createListFrom(accountStream, "result");
+            accountEntries = bscApi.createListFrom(accountStream, "result", tokentx);
 
             // write account entries to a csv file
-            toCsvFrom(accountEntries, "bsc_account.csv");
+            toCsvFrom(accountEntries, tokenTxFileName);
 
         } catch (IOException ex) {
             ex.printStackTrace();

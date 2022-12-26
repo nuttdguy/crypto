@@ -23,8 +23,8 @@ public class BscApi {
     }
 
     /* from resource stream, extract the data into a list of bsc account instances */
-    public List<BscAccount> createListFrom(InputStream resourceStream, String resourceKey) throws JSONException, IOException {
-        return bscAccountService.createListFrom(resourceStream, resourceKey);
+    public List<BscAccount> createListFrom(InputStream resourceStream, String resourceKey, String actionType) throws JSONException, IOException {
+        return bscAccountService.createListFrom(resourceStream, resourceKey, actionType);
     }
 
 }

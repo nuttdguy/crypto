@@ -44,7 +44,7 @@ public class BscAccountService {
      * throws JSONException if the resourceKey does not exist
      * throws IOException when resourceStream cannot be converted to a JsonObject
      * */
-    public List<BscAccount> createListFrom(InputStream resourceStream, String resourceKey) throws JSONException, IOException {
+    public List<BscAccount> createListFrom(InputStream resourceStream, String resourceKey, String actionType) throws JSONException, IOException {
         List<BscAccount> accountEntries = new ArrayList<>();
 
         // transform response into desired format, i.e. string, json, etc
@@ -56,14 +56,14 @@ public class BscAccountService {
         for (int i = 0; i < resourceArray.length(); i++) {
 
             // create and then add bsc account instance
-            accountEntries.add(createAccountEntry(resourceArray.getJSONObject(i)));
+            accountEntries.add(createAccountEntry(resourceArray.getJSONObject(i), actionType));
         }
         return accountEntries;
 
     }
 
     /* creates an instance of bscAccount  */
-    public BscAccount createAccountEntry(JSONObject accountEntry) {
+    public BscAccount createAccountEntry(JSONObject accountEntry, String actionType) {
         // if results is valid, extract all the keys and value types
         Map<String, Object> keyPairs =
                 extractKeyPairs(accountEntry, new HashMap<>(), true);
@@ -71,10 +71,55 @@ public class BscAccountService {
         // extract all values into String values
         Map<String, String> keyValuePairs = mapObjectsToString(keyPairs);
 
+        if (actionType.equals("txlistinternal")) {
+            return toAccountInternalFrom(keyValuePairs);
+        } else if (actionType.equals("tokentx")) {
+            return toAccountTokenTransferFrom(keyValuePairs);
+        }
+
         // map key & value pairs into list of class instances
         return toAccountFromMap(keyValuePairs);
     }
 
+    protected BscAccount toAccountTokenTransferFrom(Map<String, String> accountEntry) {
+        return new BscAccount.AccountBuilder()
+                .withBlockNumber(accountEntry.get(BLOCK_NUMBER.label))
+                .withTimeStamp(toDateTime(accountEntry.get(TIMESTAMP.label)))
+                .withHash(accountEntry.get(HASH.label))
+                .withNonce(toInteger(accountEntry.get(NONCE.label)))
+                .withBlockHash(accountEntry.get(BLOCK_HASH.label))
+                .withFrom(accountEntry.get(FROM.label))
+                .withContractAddress(accountEntry.get(CONTRACT_ADDRESS.label))
+                .withTo(accountEntry.get(TO.label))
+                .withValue(toDouble(accountEntry.get(VALUE.label)))
+                .withTokenName(accountEntry.get(TOKEN_NAME.label))
+                .withTokenSymbol(accountEntry.get(TOKEN_SYMBOL.label))
+                .withTokenDecimal(toInteger(accountEntry.get(TOKEN_DECIMAL.label)))
+                .withTransactionIndex(toInteger(accountEntry.get(TRANSACTION_INDEX.label)))
+                .withGas(toDouble(accountEntry.get(GAS.label)))
+                .withGasPrice(toDouble(accountEntry.get(GAS_PRICE.label)))
+                .withGasUsed(toDouble(accountEntry.get(GAS_USED.label)))
+                .withCumulativeGasUsed(toDouble(accountEntry.get(CONTRACT_ADDRESS.label)))
+                .withInput(accountEntry.get(INPUT.label))
+                .withConfirmations(toLong(accountEntry.get(CONFIRMATIONS.label)))
+                .build();
+    }
+
+    protected BscAccount toAccountInternalFrom(Map<String, String> accountEntry) {
+        return new BscAccount.AccountBuilder()
+                .withBlockNumber(accountEntry.get(BLOCK_NUMBER.label))
+                .withTimeStamp(toDateTime(accountEntry.get(TIMESTAMP.label)))
+                .withHash(accountEntry.get(HASH.label))
+                .withFrom(accountEntry.get(FROM.label))
+                .withTo(accountEntry.get(TO.label))
+                .withValue(toDouble(accountEntry.get(VALUE.label)))
+                .withContractAddress(accountEntry.get(CONTRACT_ADDRESS.label))
+                .withInput(accountEntry.get(INPUT.label))
+                .withGas(toDouble(accountEntry.get(GAS.label)))
+                .withGasUsed(toDouble(accountEntry.get(GAS_USED.label)))
+                .withError(toBoolean(accountEntry.get(IS_ERROR.label)))
+                .build();
+    }
 
     /* create an instance of BscAccount from a map entry */
     protected BscAccount toAccountFromMap(Map<String, String> accountEntry) {

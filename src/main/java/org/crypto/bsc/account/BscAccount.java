@@ -23,6 +23,9 @@ public class BscAccount {
     private double value;
     private String hash;
     private double gasPrice;
+    private String tokenName;
+    private String tokenSymbol;
+    private int tokenDecimal;
 
     private BscAccount() {
         // default constructor for builder
@@ -49,11 +52,26 @@ public class BscAccount {
                 this.to + "," +
                 convertToBnb(this.value) + "," +
                 this.hash + "," +
-                this.gasPrice;
+                convertToBnb(this.gasPrice) + "," +
+                this.tokenName + "," +
+                this.tokenSymbol + "," +
+                this.tokenDecimal;
     }
 
     public double convertToBnb(double value) {
         return (value / 1000000000000000000.0);
+    }
+
+    public String getTokenName() {
+        return tokenName;
+    }
+
+    public String getTokenSymbol() {
+        return tokenSymbol;
+    }
+
+    public int getTokenDecimal() {
+        return tokenDecimal;
     }
 
     public String getFunctionName() { return functionName; }
@@ -154,6 +172,10 @@ public class BscAccount {
         private double cumulativeGasUsed;
         private double gasUsed;
         private Long confirmations;
+        private String tokenName;
+        private String tokenSymbol;
+        private int tokenDecimal;
+
 
         public AccountBuilder withMethodId(String methodId) {
             this.methodId = methodId;
@@ -255,6 +277,21 @@ public class BscAccount {
             return this;
         }
 
+        public AccountBuilder withTokenName(String tokenName) {
+            this.tokenName = tokenName;
+            return this;
+        }
+
+        public AccountBuilder withTokenSymbol(String tokenSymbol) {
+            this.tokenSymbol = tokenSymbol;
+            return this;
+        }
+
+        public AccountBuilder withTokenDecimal(int tokenDecimal) {
+            this.tokenDecimal = tokenDecimal;
+            return this;
+        }
+
         public BscAccount build() {
             BscAccount account = new BscAccount();
             account.functionName = this.functionName;
@@ -277,6 +314,9 @@ public class BscAccount {
             account.gasUsed = this.gasUsed;
             account.confirmations = this.confirmations;
             account.methodId = this.methodId;
+            account.tokenName = this.tokenName;
+            account.tokenSymbol = this.tokenSymbol;
+            account.tokenDecimal = this.tokenDecimal;
             return account;
         }
 
