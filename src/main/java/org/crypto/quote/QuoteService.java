@@ -1,22 +1,18 @@
 package org.crypto.quote;
 
 import org.crypto.HttpException;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 
-import static org.crypto.Util.*;
+import static org.crypto.util.DataTypeUtil.*;
 import static org.crypto.quote.QuoteLabel.*;
 import static org.crypto.quote.QuoteLabel.LAST_UPDATED;
 
-/* Coin Market Cap API options for v1 /listing & v2 /quotes endpoint */
+/* service class to fetch /listing resource from http://api.coinmarketcap.com api */
 public class QuoteService {
 
     /* fetch and get the data from the resource endpoint with params
@@ -42,82 +38,6 @@ public class QuoteService {
         return httpURLConnection.getInputStream();
     }
 
-    public JSONObject toJsonObject(InputStream inputStream) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        String line;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-        }
-        return new JSONObject(sb.toString());
-    }
-
-    /* transform json native object values types, e.g. Integer, BigDecimal, Array -> String, into String format */
-    public Map<String, String> mapObjectsToString(Map<String, Object> resourceKeys) {
-        Map<String, String> mapEntries = new HashMap<>();
-        for (var entry : resourceKeys.entrySet()) {
-            if (!(entry.getValue() instanceof JSONObject)) {
-                mapEntries.put(entry.getKey(), entry.getValue().toString());
-            }
-        }
-        return mapEntries;
-    }
-
-    /* extract json array by object key */
-    public JSONArray extractJsonArray(JSONObject resource, String key) {
-        return resource.getJSONArray(key);
-    }
-
-    /* extract json object by object key */
-    public JSONObject extractJsonObject(JSONObject resource, String key) {
-        return resource.getJSONObject(key);
-    }
-
-    /* extract all objects and array key types; optional -> include other native type, e.g. Integer, BigDecimal
-    *  resource: the json object
-    *  keys: an empty map for adding String key and Object
-    *  includeNonObjects: set true to include all keys, i.e. object, array and string */
-    public Map<String, Object> extractKeyPairs(JSONObject resource, Map<String, Object> keys, boolean includeNonObjects) {
-        for (String key : resource.keySet()) {
-
-            // get the value of the current key
-            Object value = resource.get(key);
-
-            // include all key types
-            if (includeNonObjects) {
-                // when any type, add key
-                keys.put(key, value.toString());
-            }
-
-            // when object type, add key
-            if (value instanceof JSONObject) {
-
-                keys.put(key, value);
-                extractKeyPairs((JSONObject) value, keys, includeNonObjects);
-            }
-
-            // when object or array type, add key
-            if (value instanceof JSONArray) {
-                // within this array, extract the object types
-                keys.put(key, value);
-                extractKeyPairs((JSONArray) value, keys, includeNonObjects);
-            }
-
-        }
-        return keys;
-    }
-
-    /* private :: extracts json object types within the passed in array */
-    private void extractKeyPairs(JSONArray resource, Map<String, Object> keys, boolean includeNonObjects) {
-        for (int i = 0; i < resource.length(); i++) {
-
-            Object value = resource.get(i);
-            if (value instanceof JSONObject) {
-                extractKeyPairs((JSONObject) value, keys, includeNonObjects);
-            }
-        }
-    }
 
     /* create an instance of quote from a map entry */
     public Quote toQuoteFromMap(Map<String, String> quoteEntry) {

@@ -1,15 +1,16 @@
 package org.crypto;
 
+import org.crypto.bsc.account.BscAccount;
 import org.crypto.quote.Quote;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 public class CSVWriter<T> {
 
@@ -41,7 +42,9 @@ public class CSVWriter<T> {
                 String dataToWrite = "";
 
                 if (clazzName.contains("Quote")) {
-                    dataToWrite = toStringFrom((Quote) clazz);
+                    dataToWrite = fromClassToString((Quote) clazz);
+                } else if (clazzName.contains("BscAccount")) {
+                    dataToWrite = ((BscAccount) clazz).extractValuesToStringForWrite();
                 }
 
                 writer.write(dataToWrite);
@@ -51,7 +54,7 @@ public class CSVWriter<T> {
     }
 
 
-    private String toStringFrom(Quote quote) {
+    private String fromClassToString(Quote quote) {
         String tags = Stream.of(quote.getTags())
                 .map(tag -> tag.replace(",", "::"))
                 .collect(Collectors.joining(""));

@@ -1,4 +1,4 @@
-package org.crypto;
+package org.crypto.util;
 
 import org.json.JSONArray;
 
@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.stream.Stream;
 
-public class Util {
+public class DataTypeUtil {
 
     public static boolean isDouble(String value) {
         try {

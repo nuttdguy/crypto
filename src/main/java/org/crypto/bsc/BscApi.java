@@ -1,8 +1,8 @@
-package org.crypto;
+package org.crypto.bsc;
 
-import org.crypto.quote.QuoteService;
-import org.crypto.quote.Quote;
-import org.crypto.quote.QuoteConfig;
+import org.crypto.bsc.account.BscAccount;
+import org.crypto.bsc.account.BscAccountConfig;
+import org.crypto.bsc.account.BscAccountService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -14,29 +14,33 @@ import java.util.Map;
 
 import static org.crypto.util.JsonUtil.*;
 
-/* class to execute api requests to retrieve data from https://coinmarketcap.com */
-public class CmcApi {
+/* class to execute api requests to  retrieve data from https://api.bscscan.com/api/
+* ?/module/account
+* &action=balance
+* &address=0x.....
+* &apikey=eds3....
+* other actions found @ https://docs.bscscan.com/api-endpoints/accounts */
+public class BscApi {
 
-    private final QuoteService quoteService = new QuoteService();
+    private final BscAccountService bscAccountService = new BscAccountService();
 
-    /* fetch /quotes resource from coin market map */
-    public List<Quote> fetchLatestQuotes(QuoteConfig quoteConfig) {
-        List<Quote> quoteList = new ArrayList<>();
+    public List<BscAccount> fetchBscAccount(BscAccountConfig bscAccountConfig) {
+        List<BscAccount> accountEntries = new ArrayList<>();
 
         try {
             // retrieve response as input stream from api
             InputStream resourceInputStream =
-                    quoteService.fetchApiResource(quoteConfig.getResourceUrl(), quoteConfig.getParamString(), quoteConfig.getAPIKey());
+                    bscAccountService.fetchApiResource(bscAccountConfig.getResourceUrl(), bscAccountConfig.getParamString(), bscAccountConfig.getApikey());
 
             // transform response into desired format, i.e. string, json, etc
             JSONObject resource = toJsonObject(resourceInputStream);
 
             // extract the data array from the json object
-            JSONArray resourceArray = resource.getJSONArray("data");
+            JSONArray resourceArray = resource.getJSONArray("result");
 
             for (int i = 0; i < resourceArray.length(); i++) {
 
-                // extract all the keys and types
+                // if results is valid, extract all the keys and value types
                 Map<String, Object> keyPairs =
                         extractKeyPairs(resourceArray.getJSONObject(i), new HashMap<>(), true);
 
@@ -44,7 +48,7 @@ public class CmcApi {
                 Map<String, String> keyValuePairs = mapObjectsToString(keyPairs);
 
                 // map key & value pairs into list of class instances
-                quoteList.add(quoteService.toQuoteFromMap(keyValuePairs));
+                accountEntries.add(bscAccountService.toAccountFromMap(keyValuePairs));
 
             }
 
@@ -52,7 +56,8 @@ public class CmcApi {
             ex.printStackTrace();
         }
 
-        return quoteList;
+        return accountEntries;
+
     }
 
 }

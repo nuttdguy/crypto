@@ -19,7 +19,7 @@ import static org.crypto.ohlcv.OhlcvLabel.*;
 /* Coin Market Cap API options for v2 /ohlcv endpoint - requires startup subscription */
 /* TODO IMPLEMENT MOCK TESTS */
 public class CmcOhlcvApi {
-    private static final String APIKEY = API_KEY.SECRET;
+    private static final String APIKEY = API_KEY.CMC_SECRET;
     private static final String BASE_URL = "https://pro-api.coinmarketcap.com/";
 
     /* Endpoint requires hobbyist  */

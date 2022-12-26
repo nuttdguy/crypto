@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.crypto.Util.*;
+import static org.crypto.util.DataTypeUtil.*;
 
 public class CSVReader<T extends Transaction> {
 

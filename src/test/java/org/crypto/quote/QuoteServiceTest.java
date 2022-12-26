@@ -1,5 +1,6 @@
 package org.crypto.quote;
 
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,12 +8,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static org.crypto.util.JsonUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class QuoteServiceTest {
 
     QuoteService quoteService;
-
     JSONObject jsonObjectUnderTest;
 
     @BeforeEach
@@ -23,7 +24,7 @@ class QuoteServiceTest {
 
     @Test
     void extractJsonArrayTest() {
-        JSONArray jsonArray = quoteService.extractJsonArray(new JSONObject("{\"data\":[{\"id\":1}]}"), "data");
+        JSONArray jsonArray = extractJsonArray(new JSONObject("{\"data\":[{\"id\":1}]}"), "data");
 
         assertNotNull(jsonArray);
         assertTrue(jsonArray.length() > 0);
@@ -31,7 +32,7 @@ class QuoteServiceTest {
 
     @Test
     void extractJsonObjectTest() {
-        JSONObject jsonObject = quoteService.extractJsonObject(new JSONObject("{\"data\":{\"id\":1}}"), "data");
+        JSONObject jsonObject = extractJsonObject(new JSONObject("{\"data\":{\"id\":1}}"), "data");
 
         assertNotNull(jsonObject);
     }
@@ -39,7 +40,7 @@ class QuoteServiceTest {
     @Test
     void extractKeyPairsTest() {
         Map<String, Object> keyList = new HashMap<>();
-        keyList = quoteService.extractKeyPairs(jsonObjectUnderTest, keyList, true);
+        keyList = extractKeyPairs(jsonObjectUnderTest, keyList, true);
 
         assertTrue(keyList.size() > 0);
     }
@@ -48,10 +49,10 @@ class QuoteServiceTest {
     void mapObjectsToStringTest() {
         // setup
         Map<String, Object> keyList = new HashMap<>();
-        keyList = quoteService.extractKeyPairs(jsonObjectUnderTest, keyList, true);
+        keyList = extractKeyPairs(jsonObjectUnderTest, keyList, true);
 
         // under test
-        Map<String, String> mapEntry = quoteService.mapObjectsToString(keyList);
+        Map<String, String> mapEntry = mapObjectsToString(keyList);
 
         assertTrue(mapEntry.size() > 0);
         assertTrue(mapEntry.containsKey("id"));
@@ -64,9 +65,9 @@ class QuoteServiceTest {
     void toQuoteFromMapTest() {
         // setup
         Map<String, Object> keyList = new HashMap<>();
-        keyList = quoteService.extractKeyPairs(jsonObjectUnderTest, keyList, true);
+        keyList = extractKeyPairs(jsonObjectUnderTest, keyList, true);
 
-        Map<String, String> mapEntry = quoteService.mapObjectsToString(keyList);
+        Map<String, String> mapEntry = mapObjectsToString(keyList);
 
         // under test
         Quote quote = quoteService.toQuoteFromMap(mapEntry);

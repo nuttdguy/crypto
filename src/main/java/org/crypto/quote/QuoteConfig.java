@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class QuoteConfig extends Config {
 
-    private static final String APIKEY = API_KEY.SECRET;
+    private static final String APIKEY = API_KEY.CMC_SECRET;
     private static final String BASE_URL = "https://pro-api.coinmarketcap.com/";
     private String resourceUrl;
     private int version;
