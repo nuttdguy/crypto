@@ -14,7 +14,7 @@ import java.util.Map;
 
 /* class to execute api requests to retrieve data from https://coinmarketcap.com */
 public class CmcApi {
-    private final static CmcQuoteService cmcQuoteService = new CmcQuoteService();
+    private static final CmcQuoteService cmcQuoteService = new CmcQuoteService();
 
     private CmcApi() { /* no impl */}
 
