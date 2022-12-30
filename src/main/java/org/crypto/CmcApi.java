@@ -38,7 +38,7 @@ public class CmcApi {
 
                 // extract all the keys and types
                 Map<String, Object> keyPairs =
-                        extractKeyPairs(resourceArray.getJSONObject(i), new HashMap<>(), true);
+                        extractKeyAndJsonType(resourceArray.getJSONObject(i), new HashMap<>(), true);
 
                 // extract all values into String values
                 Map<String, String> keyValuePairs = mapObjectsToString(keyPairs);

@@ -2,6 +2,8 @@ package org.crypto.quote;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Quote {
 
@@ -33,6 +35,39 @@ public class Quote {
     private Quote() {
     }
 
+    public String extractFieldValuesToWrite() {
+
+        return this.getId() + "," +
+                this.getName() + "," +
+                this.getSymbol() + "," +
+                this.getSlug() + "," +
+                this.isActive() + "," +
+                this.isFiat() + "," +
+                this.getCirculatingSupply() + "," +
+                this.getMaxSupply() + "," +
+                this.getDateAdded() + "," +
+                this.getNumMarketPairs() + "," +
+                this.getRank() + "," +
+                this.getLastUpdated() + "," +
+                tagsToString(this.tags) + "," +
+                this.getPrice() + "," +
+                this.getVolume24() + "," +
+                this.getVolumeChange24() + "," +
+                this.getPercentChangeHr() + "," +
+                this.getPercentChange24() + "," +
+                this.getPercentChangeWk() + "," +
+                this.getPercentChange30Day() + "," +
+                this.getMarketCap() + "," +
+                this.getMarketCapDominance() + "," +
+                this.getFullyDilutedMarketCap() + "," +
+                this.getLastUpdated();
+    }
+
+    public String tagsToString(String[] array) {
+        return Stream.of(array)
+                .map(tag -> tag.replace(",", "::"))
+                .collect(Collectors.joining(""));
+    }
 
     public static class QuoteBuilder {
         private int id;

@@ -1,16 +1,13 @@
 package org.crypto;
 
-import org.crypto.bsc.account.BscAccount;
+import org.crypto.bsc.account.TxInternalTransaction;
+import org.crypto.bsc.account.TxListTransaction;
+import org.crypto.bsc.account.TxTokenTransaction;
 import org.crypto.quote.Quote;
+import org.crypto.report.TransactionEntry;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import java.io.*;
+import java.util.*;
 
 public class CSVWriter<T> {
 
@@ -19,7 +16,7 @@ public class CSVWriter<T> {
     }
 
     /* Write */
-    public void writeToCSV(String fileName, List<T> clazzList) throws IOException {
+    public void writeToCSV(String fileName, List<T> clazzList,  boolean append) throws IOException {
 
         // return when list is empty
         if (clazzList.isEmpty()) { return; }
@@ -34,7 +31,7 @@ public class CSVWriter<T> {
         String fullFileName = currentDirectory + File.separator + fileName;
 
         // write the file the current user dir
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullFileName))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullFileName, append))) {
 
             writer.write(fields);
             writer.newLine();
@@ -42,9 +39,15 @@ public class CSVWriter<T> {
                 String dataToWrite = "";
 
                 if (clazzName.contains("Quote")) {
-                    dataToWrite = fromClassToString((Quote) clazz);
-                } else if (clazzName.contains("BscAccount")) {
-                    dataToWrite = ((BscAccount) clazz).extractValuesToStringForWrite();
+                    dataToWrite = ((Quote) clazz).extractFieldValuesToWrite();
+                } else if (clazzName.contains("TxInternalTransaction")) {
+                    dataToWrite = ((TxInternalTransaction) clazz).extractFieldValuesToWrite();
+                } else if (clazzName.contains("TxListTransaction")) {
+                    dataToWrite = ((TxListTransaction) clazz).extractFieldValuesToWrite();
+                } else if (clazzName.contains("TxTokenTransaction")) {
+                    dataToWrite = ((TxTokenTransaction) clazz).extractFieldValuesToWrite();
+                } else if (clazzName.contains("TransactionEntry")) {
+                    dataToWrite = ((TransactionEntry) clazz).extractFieldValuesToWrite();
                 }
 
                 writer.write(dataToWrite);
@@ -53,36 +56,58 @@ public class CSVWriter<T> {
         }
     }
 
+    /* TODO FIX -- HOW CAN YOU GUARANTEE THE ORDER :: DATA IS NOT IN ALIGNMENT WITH HEADER FIELDS */
+    /* extract and merge the content from multiple files by row  */
+    public List<String> mergeCSVIntoMappedEntries(List<String> files) {
+        // store file data into a single string
+        List<String> fileContent = new ArrayList<>();
 
-    private String fromClassToString(Quote quote) {
-        String tags = Stream.of(quote.getTags())
-                .map(tag -> tag.replace(",", "::"))
-                .collect(Collectors.joining(""));
+        // extract the header fields
+        String headerRowFields = "";
+        for (String file : files) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
-        return quote.getId() + "," +
-                quote.getName() + "," +
-                quote.getSymbol() + "," +
-                quote.getSlug() + "," +
-                quote.isActive() + "," +
-                quote.isFiat() + "," +
-                quote.getCirculatingSupply() + "," +
-                quote.getMaxSupply() + "," +
-                quote.getDateAdded() + "," +
-                quote.getNumMarketPairs() + "," +
-                quote.getRank() + "," +
-                quote.getLastUpdated() + "," +
-                tags + "," +
-                quote.getPrice() + "," +
-                quote.getVolume24() + "," +
-                quote.getVolumeChange24() + "," +
-                quote.getPercentChangeHr() + "," +
-                quote.getPercentChange24() + "," +
-                quote.getPercentChangeWk() + "," +
-                quote.getPercentChange30Day() + "," +
-                quote.getMarketCap() + "," +
-                quote.getMarketCapDominance() + "," +
-                quote.getFullyDilutedMarketCap() + "," +
-                quote.getLastUpdated();
+                String[] headerFields = reader.readLine().split(",");
+                String headerPrefix = file.split("_")[0];
+                int i = 0;
+                for (String header : headerFields) {
+                    String hName = header.replaceFirst(String.valueOf(header.charAt(0)), String.valueOf(header.charAt(0)).toUpperCase());
+                    String headName = headerPrefix + hName.trim();
+                    headerRowFields = (i == headerFields.length-1) ?
+                            headerRowFields + headName : headerRowFields + headName + ",";
+                    i++;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            headerRowFields += ":ENDFILE";
+        }
+
+        // remove trailing comma
+//        headerRowFields = headerRowFields.substring(0, headerRowFields.length()-1);
+        fileContent.add(headerRowFields);
+
+        StringBuilder sb = new StringBuilder();
+        for (String file : files) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+
+                // append contents of file by row
+                String line;
+                boolean skipFirstLine = true;
+                while ((line = reader.readLine()) != null) {
+                    if (skipFirstLine) { skipFirstLine = false; continue; }
+                    sb.append(line).append(":LINE_BREAK");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            fileContent.add(sb.toString());
+            sb = new StringBuilder();
+        }
+
+        return fileContent;
+
     }
+
 
 }

@@ -4,6 +4,7 @@ import org.json.JSONArray;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class DataTypeUtil {
@@ -43,6 +44,13 @@ public class DataTypeUtil {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public static String isNull(String value) {
+        if (value.equals("null")) {
+            return "";
+        }
+        return value;
     }
 
     public static boolean isLocalDateTime(String localDateTime) {

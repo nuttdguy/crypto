@@ -5,7 +5,7 @@ import org.crypto.API_KEY;
 import java.util.List;
 import java.util.Objects;
 
-public class BscAccountConfig {
+public class TxConfig {
 
     enum ACTION {
         BALANCE(), BALANCE_MULTI(), BALANCE_HISTORY(), TX_LIST(), TX_LIST_INTERNAL(), TOKEN_TX()
@@ -25,11 +25,11 @@ public class BscAccountConfig {
     private Integer offset;
     private String sort;
 
-    private BscAccountConfig() {
+    private TxConfig() {
         // default for builder
     }
 
-    private BscAccountConfig(String action, String address) {
+    private TxConfig(String action, String address) {
         this.action = action;
         this.address = address;
     }
@@ -137,22 +137,22 @@ public class BscAccountConfig {
             this.sort = sort; return this;
         }
 
-        public BscAccountConfig build() {
-            BscAccountConfig bscAccountConfig = new BscAccountConfig();
-            bscAccountConfig.action = this.action;
-            bscAccountConfig.address = this.address;
-            bscAccountConfig.tag = this.tag;
-            bscAccountConfig.blockNo = this.blockNo;
-            bscAccountConfig.startBlock = this.startBlock;
-            bscAccountConfig.endBlock = this.endBlock;
-            bscAccountConfig.page = this.page;
-            bscAccountConfig.offset = this.offset;
-            bscAccountConfig.sort = this.sort;
-            return bscAccountConfig;
+        public TxConfig build() {
+            TxConfig txConfig = new TxConfig();
+            txConfig.action = this.action;
+            txConfig.address = this.address;
+            txConfig.tag = this.tag;
+            txConfig.blockNo = this.blockNo;
+            txConfig.startBlock = this.startBlock;
+            txConfig.endBlock = this.endBlock;
+            txConfig.page = this.page;
+            txConfig.offset = this.offset;
+            txConfig.sort = this.sort;
+            return txConfig;
         }
 
-        public BscAccountConfig build(String action, String address) {
-            return new BscAccountConfig(action, address);
+        public TxConfig build(String action, String address) {
+            return new TxConfig(action, address);
         }
 
     }

@@ -1,6 +1,6 @@
 package org.crypto.bsc;
 
-import org.crypto.Transaction;
+import org.crypto.bsc.account.Transaction;
 
 import java.time.LocalDateTime;
 

@@ -2,11 +2,9 @@ package org.crypto;
 
 import org.crypto.bsc.BscTransaction;
 import org.crypto.quote.QuoteTransaction;
+import org.crypto.bsc.account.Transaction;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +46,61 @@ public class CSVReader<T extends Transaction> {
             }
         }
         return transactionList;
+    }
+
+    public List<String> readFromCSV(List<String> files) throws IOException {
+        // store file data into a single string
+        List<String> fileContent = new ArrayList<>();
+
+        StringBuilder sb = new StringBuilder();
+        for (String file : files) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+
+                // append contents of file by row
+                String line;
+                boolean addHeaderRow = true;
+                while ((line = reader.readLine()) != null) {
+
+                    if (addHeaderRow) {
+                        // add the header row as a list element
+                        fileContent.add(line);
+                        addHeaderRow = false;
+                        continue;
+                    }
+                    // append every line to the previous line
+                    sb.append(line).append(":ENDLINE");
+                }
+                // add the string-builder content string as a list element
+                fileContent.add(sb.toString());
+
+                // reset string-builder for next file
+                sb = new StringBuilder();
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return fileContent;
+
+    }
+
+    public static String extractHeaderRowFromCSV(String fileName) {
+        // read from the current user directory; try closes reader by default
+        String headerRow = "";
+        String currentDirectory = System.getProperty("user.dir");
+        String fullFileName = currentDirectory + File.separator + fileName;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fullFileName))) {
+
+            // extract the first row
+            headerRow = reader.readLine();
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        // return the header row
+        return headerRow;
     }
 
     private QuoteTransaction toQuoteTransaction(String[] f) {

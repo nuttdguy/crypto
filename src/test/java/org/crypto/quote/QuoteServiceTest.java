@@ -40,7 +40,7 @@ class QuoteServiceTest {
     @Test
     void extractKeyPairsTest() {
         Map<String, Object> keyList = new HashMap<>();
-        keyList = extractKeyPairs(jsonObjectUnderTest, keyList, true);
+        keyList = extractKeyAndJsonType(jsonObjectUnderTest, keyList, true);
 
         assertTrue(keyList.size() > 0);
     }
@@ -49,7 +49,7 @@ class QuoteServiceTest {
     void mapObjectsToStringTest() {
         // setup
         Map<String, Object> keyList = new HashMap<>();
-        keyList = extractKeyPairs(jsonObjectUnderTest, keyList, true);
+        keyList = extractKeyAndJsonType(jsonObjectUnderTest, keyList, true);
 
         // under test
         Map<String, String> mapEntry = mapObjectsToString(keyList);
@@ -65,7 +65,7 @@ class QuoteServiceTest {
     void toQuoteFromMapTest() {
         // setup
         Map<String, Object> keyList = new HashMap<>();
-        keyList = extractKeyPairs(jsonObjectUnderTest, keyList, true);
+        keyList = extractKeyAndJsonType(jsonObjectUnderTest, keyList, true);
 
         Map<String, String> mapEntry = mapObjectsToString(keyList);
 

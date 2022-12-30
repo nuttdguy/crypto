@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.crypto.util.DataTypeUtil.isDouble;
+
 /* Util class to translate data types into json or string formats */
 public class JsonUtil {
 
@@ -36,6 +38,14 @@ public class JsonUtil {
         return mapEntries;
     }
 
+    public static Map<String, String> mapObjectsToString(JSONObject resourceKeys) {
+        Map<String, String> mapEntries = new HashMap<>();
+        for (var key : resourceKeys.keySet()) {
+            mapEntries.put(key, (String) resourceKeys.get(key));
+        }
+        return mapEntries;
+    }
+
     /* extract json array by object key */
     public static JSONArray extractJsonArray(JSONObject resource, String key) {
         return resource.getJSONArray(key);
@@ -50,7 +60,7 @@ public class JsonUtil {
      *  resource: the json object
      *  keys: an empty map for adding String key and Object
      *  includeNonObjects: set true to include all keys, i.e. object, array and string */
-    public static Map<String, Object> extractKeyPairs(JSONObject resource, Map<String, Object> keys, boolean includeNonObjects) {
+    public static Map<String, Object> extractKeyAndJsonType(JSONObject resource, Map<String, Object> keys, boolean includeNonObjects) {
         for (String key : resource.keySet()) {
 
             // get the value of the current key
@@ -65,14 +75,14 @@ public class JsonUtil {
             // when object type, add key
             if (value instanceof JSONObject) {
                 keys.put(key, value);
-                extractKeyPairs((JSONObject) value, keys, includeNonObjects);
+                extractKeyAndJsonType((JSONObject) value, keys, includeNonObjects);
             }
 
             // when object or array type, add key
             if (value instanceof JSONArray) {
                 // within this array, extract the object types
                 keys.put(key, value);
-                extractKeyPairs((JSONArray) value, keys, includeNonObjects);
+                extractKeyAndJsonType((JSONArray) value, keys, includeNonObjects);
             }
 
         }
@@ -80,12 +90,12 @@ public class JsonUtil {
     }
 
     /* private :: extracts json object types within the passed in array */
-    private static void extractKeyPairs(JSONArray resource, Map<String, Object> keys, boolean includeNonObjects) {
+    private static void extractKeyAndJsonType(JSONArray resource, Map<String, Object> keys, boolean includeNonObjects) {
         for (int i = 0; i < resource.length(); i++) {
 
             Object value = resource.get(i);
             if (value instanceof JSONObject) {
-                extractKeyPairs((JSONObject) value, keys, includeNonObjects);
+                extractKeyAndJsonType((JSONObject) value, keys, includeNonObjects);
             }
         }
     }

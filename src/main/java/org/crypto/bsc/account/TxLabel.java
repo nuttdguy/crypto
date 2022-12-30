@@ -1,6 +1,6 @@
 package org.crypto.bsc.account;
 
-public enum BscAccountLabel {
+public enum TxLabel {
 
     FUNCTION_NAME("functionName"),
     BLOCK_NUMBER("blockNumber"),
@@ -28,7 +28,7 @@ public enum BscAccountLabel {
 
     public final String label;
 
-    private BscAccountLabel(String label) {
+    private TxLabel(String label) {
         this.label = label;
     }
 

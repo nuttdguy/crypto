@@ -1,8 +1,9 @@
 package org.crypto.bsc;
 
-import org.crypto.bsc.account.BscAccount;
-import org.crypto.bsc.account.BscAccountConfig;
-import org.crypto.bsc.account.BscAccountService;
+import org.crypto.bsc.account.Transaction;
+import org.crypto.bsc.account.TxConfig;
+import org.crypto.bsc.account.TxAccountService;
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -14,17 +15,23 @@ import java.util.List;
 * other actions found @ https://docs.bscscan.com/api-endpoints/accounts */
 public class BscApi {
 
-    private final BscAccountService bscAccountService = new BscAccountService();
+    private final TxAccountService txAccountService = new TxAccountService();
 
     /* fetch the resource */
-    public InputStream fetchBscAccount(BscAccountConfig bscAccountConfig) throws IOException {
+    public InputStream fetchBscAccount(TxConfig txConfig) throws IOException {
         // retrieve response as input stream from api
-        return bscAccountService.fetchApiResource(bscAccountConfig.getResourceUrl(), bscAccountConfig.getParamString(), bscAccountConfig.getApikey());
+        return txAccountService.fetchApiResource(txConfig.getResourceUrl(), txConfig.getParamString(), txConfig.getApikey());
     }
 
-    /* from resource stream, extract the data into a list of bsc account instances */
-    public List<BscAccount> createListFrom(InputStream resourceStream, String resourceKey, String actionType) throws JSONException, IOException {
-        return bscAccountService.createListFrom(resourceStream, resourceKey, actionType);
+    /* extract a json array from the input stream resource */
+    public JSONArray extractJsonArrayFrom(InputStream resourceStream, String resourceKey) throws IOException {
+        return txAccountService.extractJsonArrayFrom(resourceStream, resourceKey);
     }
+
+    /* from a json array, extract the data into a list of transactions  */
+    public List<Transaction> createTransactionListFrom(JSONArray jsonArrayResource, String actionType) throws JSONException, IOException {
+        return txAccountService.createTransactionListFrom(jsonArrayResource, actionType);
+    }
+
 
 }
