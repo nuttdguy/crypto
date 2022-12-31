@@ -36,6 +36,7 @@ public class CSVReader {
                     addHeaderRow = false;
                     continue;
                 }
+
                 // append every line to the previous line
                 sb.append(line).append("/n/r");
             }
@@ -83,24 +84,23 @@ public class CSVReader {
 
     }
 
-    public static String extractHeaderRowFromCSV(String fileName) {
+    public String extractHeaderRowFromCSV(String fileName) {
         // read from the current user directory; try closes reader by default
-        String headerRow = "";
         String currentDirectory = System.getProperty("user.dir");
         String fullFileName = currentDirectory + File.separator + fileName;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(fullFileName))) {
 
-            // extract the first row
-            headerRow = reader.readLine();
+            // extract the first row and return the header row
+            return reader.readLine();
 
         } catch (IOException ex) {
             ex.printStackTrace();
+            throw new RuntimeException(ex.getMessage());
         }
-        // return the header row
-        return headerRow;
     }
 
+    // TODO - REMOVE
     private QuoteTransaction toQuoteTransaction(String[] f) {
         return new QuoteTransaction.TransactionBuilder()
                 .withId(toInteger(f[0]))

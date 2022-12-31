@@ -15,6 +15,7 @@ public class CSVWriter<T> {
         // nothing to implement
     }
 
+    //== TODO -- FIX AND EXTRACT AND BREAK OUT WRITE SECTION
     /* Write */
     public void writeToCSV(String fileName, List<T> clazzList,  boolean append) throws IOException {
 

@@ -3,7 +3,6 @@ package org.crypto.bsc.account;
 import org.crypto.CSVReader;
 import org.crypto.CSVWriter;
 import org.crypto.HttpException;
-import org.crypto.report.TransactionEntry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,9 +12,11 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static org.crypto.bsc.account.TxActionType.*;
 import static org.crypto.bsc.account.TxLabel.*;
 import static org.crypto.util.DataTypeUtil.*;
@@ -23,6 +24,83 @@ import static org.crypto.util.JsonUtil.*;
 
 /* service class to fetch /?module=account resource from bsc explorer api */
 public class TxAccountService {
+
+
+
+    /* create a mapped entry from a header and file contents */
+    public List<Map<String, String>> createMappedEntriesFrom(String[] headerRow, String[] fileContent) {
+        List<Map<String, String>> entries = new ArrayList<>();
+
+        // iterate through each row entry
+        for (String row : fileContent) {
+            Map<String, String> entry = new HashMap<>();
+            String[] content = row.split(",");  // split the current row into single elements
+
+            int i = 0;
+            for (String header : headerRow) {
+                // map the header and field values for the current row
+                entry.putIfAbsent(header, content[i]);
+                i++;
+            }
+            // add the map entry to the list
+            entries.add(entry);
+        }
+        return entries;
+    }
+
+
+    /* creates a Transaction class instance matching the Api Action= type  */
+    public Transaction createTxTransaction(JSONObject jsonObject, String actionType) {
+
+        // extract all key and value pairs
+        Map<String, String> keyValuePairs = mapObjectsToString(jsonObject);
+
+        // create a Transaction matching the action type
+        // map key & value pairs into list of class instances
+        if (actionType.equals(TX_LIST.label)) {
+            return toTxListFrom(keyValuePairs);
+
+        } else if (actionType.equals(TX_LIST_INTERNAL.label)) {
+            return toTxInternalFrom(keyValuePairs);
+
+        } else if (actionType.equals(TOKEN_TX.label)) {
+            return toTxTokenFrom(keyValuePairs);
+        }
+
+        throw new RuntimeException(format("%s action type is not supported", actionType));
+    }
+
+
+    /* creates a Transaction class instance from a mapped entry  */
+    public Transaction createTxTransaction(Map<String, String> mapEntry, String actionType) {
+
+        // create a Transaction matching the action type
+        // map key & value pairs into list of class instances
+        if (actionType.equals(TX_LIST.label)) {
+            return toTxListFrom(mapEntry);
+
+        } else if (actionType.equals(TX_LIST_INTERNAL.label)) {
+            return toTxInternalFrom(mapEntry);
+
+        } else if (actionType.equals(TOKEN_TX.label)) {
+            return toTxTokenFrom(mapEntry);
+        }
+
+        throw new RuntimeException(format("%s action type is not supported", actionType));
+    }
+
+
+    /* from json array resource, create a Transaction for every element and return the List */
+    public List<Transaction> createTransactionListFrom(JSONArray resourceArray, String actionType) {
+        List<Transaction> accountEntries = new ArrayList<>();
+
+        // create a Transaction for every element in the array
+        for (int i = 0; i < resourceArray.length(); i++) {
+            accountEntries.add(createTxTransaction(resourceArray.getJSONObject(i), actionType));
+        }
+        return accountEntries;
+    }
+
 
     /* fetch and get the data from the resource endpoint with params */
     public InputStream fetchApiResource(String resourceUrl, String resourceParams, String APIKEY) throws IOException {
@@ -43,6 +121,7 @@ public class TxAccountService {
         return httpURLConnection.getInputStream();
     }
 
+
     /* from resource stream, extract the json array using the resource object key
      * throws JSONException if the resourceKey does not exist
      * throws IOException when resourceStream cannot be converted to a JsonObject
@@ -53,23 +132,20 @@ public class TxAccountService {
         return resource.getJSONArray(resourceObjectKey);
     }
 
-    /* from json array resource, create a Transaction for every element and return the List */
-    public List<Transaction> createTransactionListFrom(JSONArray resourceArray, String actionType) {
-        List<Transaction> accountEntries = new ArrayList<>();
 
-        // create a Transaction for every element in the array
-        for (int i = 0; i < resourceArray.length(); i++) {
-            accountEntries.add(createTxTransaction(resourceArray.getJSONObject(i), actionType));
-        }
-        return accountEntries;
-
+    /* read from file and return a list of Transactions */
+    public List<String> readTransactionsFrom(String file) throws IOException {
+        // get file contents as a list
+        CSVReader csvReader = new CSVReader();
+        return csvReader.readFrom(file);
     }
+
 
     /* from a TransactionList, write entries to a file */
     public int writeTransactionsToCsv(List<Transaction> transactions, String fileName, boolean append) {
         // write BscAccount results to a file
         CSVWriter<Transaction> csvWriter = new CSVWriter<>();
-        String fileExt = " _transaction.csv";
+        String fileExt = "_transactions.csv";
         try {
             csvWriter.writeToCSV(fileName + fileExt, transactions, append);
             return 1;
@@ -79,35 +155,8 @@ public class TxAccountService {
         return -1;
     }
 
-    /* read from file and return a list of Transactions */
-    public List<String> readTransactionsFrom(String file) throws IOException {
-        // get file contents as a list
-        CSVReader csvReader = new CSVReader();
-        return csvReader.readFrom(file);
-    }
 
-    //=== PROTECTED ==//
-
-    /* creates a Transaction class instance matching the Api Action= type  */
-    protected Transaction createTxTransaction(JSONObject jsonObject, String actionType) {
-
-        // extract all key and value pairs
-        Map<String, String> keyValuePairs = mapObjectsToString(jsonObject);
-
-        // create a Transaction matching the action type
-        // map key & value pairs into list of class instances
-        if (actionType.equals(TX_LIST.label)) {
-            return toTxListFrom(keyValuePairs);
-
-        } else if (actionType.equals(TX_LIST_INTERNAL.label)) {
-            return toTxInternalFrom(keyValuePairs);
-
-        } else if (actionType.equals(TOKEN_TX.label)) {
-            return toTxTokenFrom(keyValuePairs);
-        }
-
-        return null;
-    }
+    //=== PROTECTED - FOR MAPPING VALUES TO CLASS INSTANCES ==//
 
     /* create an instance of TxListTransaction from a map entry */
     protected TxTokenTransaction toTxTokenFrom(Map<String, String> entry) {

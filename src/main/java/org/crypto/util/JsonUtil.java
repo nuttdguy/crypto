@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.crypto.util.DataTypeUtil.isDouble;
 
 /* Util class to translate data types into json or string formats */
 public class JsonUtil {
@@ -25,6 +24,10 @@ public class JsonUtil {
             }
         }
         return new JSONObject(sb.toString());
+    }
+
+    public static JSONObject toJsonObject(Map<String, Object> mapEntry) {
+        return new JSONObject(mapEntry);
     }
 
     /* transform json native object values types, e.g. Integer, BigDecimal, Array -> String, into String format */
