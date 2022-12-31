@@ -24,20 +24,21 @@ public class TxInternalTransaction extends Transaction {
     }
 
     public String extractFieldValuesToWrite() {
-        return this.blockNumber + "," +
-                this.timeStamp + "," +
-                this.hash + "," +
-                this.from + "," +
-                this.to + "," +
-                this.value + "," +
+        return
+                this.blockNumber + "," +
                 this.contractAddress + "," +
-                this.input + "," +
-                this.type + "," +
+                this.errCode + "," +
+                this.from + "," +
                 this.gas + "," +
                 this.gasUsed + "," +
-                this.traceId + "," +
+                this.hash + "," +
+                this.input + "," +
                 this.isError + "," +
-                this.errCode;
+                this.timeStamp + "," +
+                this.to + "," +
+                this.traceId + "," +
+                this.type + "," +
+                this.value;
     }
 
     public static class Builder {

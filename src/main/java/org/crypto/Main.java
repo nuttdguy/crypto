@@ -2,14 +2,13 @@ package org.crypto;
 
 import org.crypto.bsc.BscApi;
 import org.crypto.bsc.account.Transaction;
+import org.crypto.bsc.account.TxActionType;
 import org.crypto.bsc.account.TxConfig;
 import org.crypto.quote.Quote;
 import org.crypto.quote.QuoteConfig;
 import org.crypto.report.TransactionEntry;
-import org.json.JSONArray;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -25,105 +24,53 @@ public class Main {
         // fetch quotes
 //        fetchQuote();
 
-        // fetch bsc account for module=account:
-        // not implemented actions ["tokennfttx", "getminedblocks"]
-        // mot implemented modules ["contracts", "transactions", "blocks", "tokens"]
-        String[] txActions = new String[]{"txlist", "txlistinternal", "tokentx"};
+        // init and set config object
+        BscApi bscApi = new BscApi();
 
-        // todo -- fix the generic attempt to model data; n=does not work b/c fields that should not be included are.
-//        fetchBscAccount("tokentx");
+        // fetch transactions for actions in
+        int writeSuccess = 0;
+        for (TxActionType action : TxActionType.values()) {
 
-        for (String action : txActions) {
-            fetchBscAccount(action);
+            // build the config object
+            TxConfig txConfig = new TxConfig.Builder().build(action, API_KEY.BSC_ADDRESS);
+
+            List<Transaction> transactionList;
+            try {
+                // fetch transactions for all TxActionTypes
+                transactionList = bscApi.fetchTxTransactions(txConfig);
+                // write the transaction to file
+                writeSuccess += bscApi.writeTransactionsToCsv(transactionList, action.label, false);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
+
+        out.println("write="+writeSuccess);
+
 
         // generate single report file
         String fileName = "all_bsc_transactions.csv";
         List<String> files = List.of(
-                "internal_bsc_account.csv",
-                "tokentx_bsc_account.csv",
-                "txlist_bsc_account.csv",
+                "txlistinternal_transactions.csv",
+                "tokentx_transactions.csv",
+                "txlist_transactions.csv",
                 "bnb_price_history.csv"
         );
 
         List<String> fileContents = new ArrayList<>();
 
-        try {
-            fileContents = readFromFiles(files);
-        } catch (IOException io) {
-            io.printStackTrace();
-        }
-
-//        List<TokenTx> tokenTxList = new ArrayList<>();
-//        for (String fieldValues : fileContents.get(3).split(":ENDLINE")) {
-//            TokenTx tokenTx = toTokenTx(fieldValues.split(","));
-//            tokenTxList.add(tokenTx);
+//        try {
+//            fileContents = readFromFiles(files);
+//        } catch (IOException io) {
+//            io.printStackTrace();
 //        }
 
 
-        // redo
-//        generateReport(files, fileName);
-
 
     }
 
-    /* read from multiple files; return header row and file content as list elements for each file */
-    public static List<String> readFromFiles(List<String> files) throws IOException {
-        // get file contents as a list
-        CSVReader<TransactionEntry> csvReader = new CSVReader<>();
-        return csvReader.readFromCSV(files);
-    }
 
-//    public static InternalBsc toInternalBsc(String[] values) {
-//        return new InternalBsc.Builder()
-//                .withBlockNumber(toInteger(values[0]))
-//                .withTimeStamp(toDateTime(values[1]))
-//                .withHash(values[2])
-//                .withFrom(values[3])
-//                .withTo(values[4])
-//                .withValue(toInteger(values[5]))
-//                .withContractAddress(values[6])
-//                .withInput(values[7])
-//                .withType(values[8])
-//                .withGas(toInteger(values[9]))
-//                .withGasUsed(toInteger(values[10]))
-//                .withTraceId(values[11])
-//                .withError(toBoolean(values[12]))
-//                .withErrCode(values[13])
-//                .build();
-//    }
-
-
-    /* create tokenTx object from string array */
-//    public static TokenTx toTokenTx(String[] values) {
-//
-//        return new TokenTx.Builder()
-//            .withBlockHash(values[0])
-//            .withConfirmations(toInteger(values[1]))
-//            .withContractAddress(values[2])
-//            .withFunctionName(values[3])
-//            .withInput(values[4])
-//            .withError(toBoolean(values[5]))
-//            .withMethodId(values[6])
-//            .withBlockNumber(toInteger(values[7]))
-//            .withTransactionIndex(toInteger(values[8]))
-//            .withNonce(toInteger(values[9]))
-//            .withTimeStamp(toDateTime(values[10]))
-//            .withGasUsed(toInteger(values[11]))
-//            .withTxreceipt_status(toInteger(values[12]))
-//            .withGas(toInteger(values[13]))
-//            .withCumulativeGasUsed(toInteger(values[14]))
-//            .withFrom(values[15])
-//            .withTo(values[16])
-//            .withValue(toDouble(values[17]))
-//            .withHash(values[18])
-//            .withGasPrice(toDouble(values[19]))
-//            .withTokenName(values[20])
-//            .withTokenSymbol(values[21])
-//            .withTokenDecimal(toInteger(values[22]))
-//            .build();
-//
-//    }
 
 
     public static void generateReport(List<String> files, String fileName) {
@@ -406,7 +353,6 @@ public class Main {
     }
 
 
-
     public static List<TransactionEntry>  createTransactionEntry(List<String> columns, List<String> fieldValues) {
         // create transaction object
         List<TransactionEntry> transactionEntryList = new ArrayList<>();
@@ -539,56 +485,6 @@ public class Main {
         return transactionEntryList;
     }
 
-    public static void fetchBscAccount(String txAction) {
-
-        // fetch latest quotes
-        BscApi bscApi = new BscApi();
-        TxConfig config = new TxConfig
-                .AccountConfigBuilder()
-                .build(txAction, API_KEY.BSC_ADDRESS);
-
-        List<Transaction> accountEntries = new ArrayList<>();
-        JSONArray jsonArrayResource;
-        try (InputStream apiStream = bscApi.fetchBscAccount(config)) {
-            // create a list from the returned resource stream
-            jsonArrayResource = bscApi.extractJsonArrayFrom(apiStream, "result");
-            accountEntries = bscApi.createTransactionListFrom(jsonArrayResource,  config.getAction());
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-
-        String fileName = "";
-        String postfix = "bsc_account.csv";
-        if (!(accountEntries.isEmpty())) {
-
-            if (config.getAction().equals("tokentx")) {
-                fileName = "tokentx_";
-            } else if (config.getAction().equals("txlistinternal")) {
-                fileName = "internal_";
-            } else if (config.getAction().equals("txlist")) {
-                fileName = "txlist_";
-            }
-            // write account entries to a csv file
-            toCsvFrom(accountEntries, fileName + postfix);
-
-        }
-
-
-    }
-
-    public static void toCsvFrom(List<Transaction> accountEntries, String fileName) {
-
-        // write BscAccount results to a file
-        CSVWriter<Transaction> quoteCSVWriter = new CSVWriter<>();
-        try {
-            quoteCSVWriter.writeToCSV(fileName, accountEntries, false);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-
-    }
 
     public static void fetchQuote() {
         // fetch latest quotes

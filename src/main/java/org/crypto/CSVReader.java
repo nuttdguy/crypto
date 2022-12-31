@@ -1,8 +1,7 @@
 package org.crypto;
 
-import org.crypto.bsc.BscTransaction;
 import org.crypto.quote.QuoteTransaction;
-import org.crypto.bsc.account.Transaction;
+
 
 import java.io.*;
 import java.util.ArrayList;
@@ -10,42 +9,41 @@ import java.util.List;
 
 import static org.crypto.util.DataTypeUtil.*;
 
-public class CSVReader<T extends Transaction> {
+public class CSVReader {
 
-    @SuppressWarnings("unchecked")
-    public List<T> readFromCSV(String fileName, Class<?> clazz) throws IOException {
-        // extract the class name in order to generify
-        String className = clazz.getName().substring(clazz.getName().lastIndexOf(".")+1);
-        List<T> transactionList = new ArrayList<>();
+    /* read contents from within the file and for each line,
+     *  add the concatenated line as an element in the returned list
+     *  first element contains the header columns
+     *  second element contains the contents of the file  */
+    public List<String> readFrom(String file) throws IOException {
+        // store file data into a single string
+        List<String> fileContents = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
 
         // read from the current user directory; try closes reader by default
         String currentDirectory = System.getProperty("user.dir");
-        String fullFileName = currentDirectory + File.separator + fileName;
+        String fullFileName = currentDirectory + File.separator + file;
         try (BufferedReader reader = new BufferedReader(new FileReader(fullFileName))) {
 
+            // append contents of file by row
             String line;
-            boolean skipFirstLine = true;
+            boolean addHeaderRow = true;
             while ((line = reader.readLine()) != null) {
 
-                // skip the first line, i.e. header row
-                if (skipFirstLine) { skipFirstLine = false; continue; }
-
-                // split the string field values
-                String[] fields = line.replace("\"", "").split(",");
-
-                // transform field values into a class instance; T should be known at runtime
-                T tx;
-                switch (className) {
-                    case "BscTransaction" -> tx = (T) toBscTransaction(fields);
-                    case "QuoteTransaction" -> tx = (T) toQuoteTransaction(fields);
-                    default -> throw new RuntimeException("Unable to convert T");
+                if (addHeaderRow) {
+                    // add the header row as the first element of the list
+                    fileContents.add(line);
+                    addHeaderRow = false;
+                    continue;
                 }
-
-                // add the record into the list
-                transactionList.add(tx);
+                // append every line to the previous line
+                sb.append(line).append("/n/r");
             }
         }
-        return transactionList;
+        // add contents of the StringBuilder as the second element of the list
+        fileContents.add(sb.toString());
+
+        return fileContents;
     }
 
     public List<String> readFromCSV(List<String> files) throws IOException {
@@ -128,21 +126,6 @@ public class CSVReader<T extends Transaction> {
                 .withMarketCap(toDouble(f[20]))
                 .withMarketCapDominance(toInteger(f[21]))
                 .withFullyDilutedMarketCap(toDouble(f[22]))
-                .build();
-    }
-
-    private BscTransaction toBscTransaction(String[] f) {
-        return new BscTransaction.TransactionBuilder()
-                .withTxHash(f[0])
-                .withUnixTimestamp(Long.parseLong(f[1]))
-                .withDateTime(toDateTime(f[2]))
-                .withFrom(f[3])
-                .withTo(f[4])
-                .withTokenValue(toDouble(f[5]))
-                .withUsdValueDayOfTx(toDouble(f[6]))
-                .withContractAddress(f[7])
-                .withTokenName(f[8])
-                .withTokenSymbol(f[9])
                 .build();
     }
 

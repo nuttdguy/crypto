@@ -4,7 +4,6 @@ package org.crypto.bsc.account;
 public class TxTokenTransaction extends Transaction {
 
     private int blockNumber;
-    private String functionName;
     private String hash;
     private String from;
     private String to;
@@ -28,33 +27,29 @@ public class TxTokenTransaction extends Transaction {
     }
 
     public String extractFieldValuesToWrite() {
-        return this.blockNumber + "," +
-                this.functionName + "," +
-                this.hash + "," +
-                this.from + "," +
-                this.to + "," +
-                this.value + "," +
-                this.contractAddress + "," +
-                this.input + "," +
-                this.gas + "," +
-                this.gasUsed + "," +
-                this.nonce + "," +
+        return
                 this.blockHash + "," +
+                this.blockNumber + "," +
+                this.confirmations + "," +
+                this.contractAddress + "," +
+                this.cumulativeGasUsed + "," +
+                this.from + "," +
+                this.gas + "," +
+                this.gasPrice + "," +
+                this.gasUsed + "," +
+                this.hash + "," +
+                this.input + "," +
+                this.nonce + "," +
+                this.to + "," +
+                this.tokenDecimal + "," +
                 this.tokenName + "," +
                 this.tokenSymbol + "," +
-                this.tokenDecimal + "," +
                 this.transactionIndex + "," +
-                this.gasPrice + "," +
-                this.cumulativeGasUsed + "," +
-                this.confirmations;
+                this.value;
     }
 
     public int getBlockNumber() {
         return blockNumber;
-    }
-
-    public String getFunctionName() {
-        return functionName;
     }
 
     public String getHash() {
@@ -128,7 +123,6 @@ public class TxTokenTransaction extends Transaction {
     public static class Builder {
 
         private int blockNumber;
-        private String functionName;
         private String hash;
         private String from;
         private String to;
@@ -151,12 +145,6 @@ public class TxTokenTransaction extends Transaction {
             this.blockNumber = blockNumber;
             return this;
         }
-
-        public Builder withFunctionName(String functionName) {
-            this.functionName = functionName;
-            return this;
-        }
-
 
         public Builder withHash(String hash) {
             this.hash = hash;
@@ -246,7 +234,6 @@ public class TxTokenTransaction extends Transaction {
         public TxTokenTransaction build() {
             TxTokenTransaction txToken = new TxTokenTransaction();
             txToken.blockNumber = this.blockNumber;
-            txToken.functionName = this.functionName;
             txToken.hash = this.hash;
             txToken.blockHash = this.blockHash;
             txToken.contractAddress = this.contractAddress;

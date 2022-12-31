@@ -24,7 +24,10 @@ public class CSVWriter<T> {
         // get the class name and fields to use as header row
         String clazzName = clazzList.get(0).getClass().getName();
         List<String> fieldList = ClassFieldExtractor.extractDeclaredFields(clazzList.get(0).getClass());
+        // sort the header row columns
+        Collections.sort(fieldList);
         String fields = String.join(",", fieldList);
+
 
         // get the current directory, append to the filename
         String currentDirectory = System.getProperty("user.dir");

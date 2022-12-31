@@ -7,15 +7,11 @@ import java.util.Objects;
 
 public class TxConfig {
 
-    enum ACTION {
-        BALANCE(), BALANCE_MULTI(), BALANCE_HISTORY(), TX_LIST(), TX_LIST_INTERNAL(), TOKEN_TX()
-    }
-
     private static final String APIKEY = API_KEY.BSC_SECRET;
     private static final String BASE_URL = "https://api.bscscan.com/api/";
 
     private final String module = "account";
-    private String action = "txlist";
+    private TxActionType action;
     private String address;
     private List<String> tag;
     private String blockNo;
@@ -29,23 +25,35 @@ public class TxConfig {
         // default for builder
     }
 
-    private TxConfig(String action, String address) {
+    private TxConfig(TxActionType action, String address) {
         this.action = action;
         this.address = address;
     }
 
     public String getResourceUrl() {
-        return BASE_URL + "?module=" + module + "&action=" + action + "&address=" + address;
+        return BASE_URL + "?module=" + module + "&action=" + action.label + "&address=" + address;
     }
 
     public String getParamString() {
         String paramString = "";
-        if (Objects.nonNull(tag)) { paramString += "&tag="+ String.join(",", tag); }
-        if (Objects.nonNull(blockNo)) { paramString += "&blockno="+blockNo; }
-        if (Objects.nonNull(startBlock)) { paramString += "&startblock="+startBlock; }
-        if (Objects.nonNull(endBlock)) { paramString += "&endBlock="+endBlock; }
-        if (Objects.nonNull(page)) { paramString += "&page="+page; }
-        if (Objects.nonNull(offset)) { paramString += "&sort="+sort; }
+        if (Objects.nonNull(tag)) {
+            paramString += "&tag=" + String.join(",", tag);
+        }
+        if (Objects.nonNull(blockNo)) {
+            paramString += "&blockno=" + blockNo;
+        }
+        if (Objects.nonNull(startBlock)) {
+            paramString += "&startblock=" + startBlock;
+        }
+        if (Objects.nonNull(endBlock)) {
+            paramString += "&endBlock=" + endBlock;
+        }
+        if (Objects.nonNull(page)) {
+            paramString += "&page=" + page;
+        }
+        if (Objects.nonNull(offset)) {
+            paramString += "&sort=" + sort;
+        }
         return paramString;
     }
 
@@ -53,7 +61,7 @@ public class TxConfig {
         return "&apikey=" + APIKEY;
     }
 
-    public String getAction() {
+    public TxActionType getAction() {
         return action;
     }
 
@@ -89,8 +97,8 @@ public class TxConfig {
         return sort;
     }
 
-    public static class AccountConfigBuilder {
-        private String action;
+    public static class Builder {
+        private TxActionType action;
         private String address;
         private List<String> tag;
         private String blockNo;
@@ -101,40 +109,49 @@ public class TxConfig {
         private String sort;
 
 
-        public AccountConfigBuilder withAction(String action) {
-            this.action = action; return this;
+        public Builder withAction(TxActionType action) {
+            this.action = action;
+            return this;
         }
 
-        public AccountConfigBuilder withAddress(String address) {
-            this.address = address; return this;
+        public Builder withAddress(String address) {
+            this.address = address;
+            return this;
         }
 
-        public AccountConfigBuilder withTag(List<String> tag) {
-            this.tag = tag; return this;
+        public Builder withTag(List<String> tag) {
+            this.tag = tag;
+            return this;
         }
 
-        public AccountConfigBuilder withBlockNo(String blockNo) {
-            this.blockNo = blockNo; return this;
+        public Builder withBlockNo(String blockNo) {
+            this.blockNo = blockNo;
+            return this;
         }
 
-        public AccountConfigBuilder withStartBlock(Integer startBlock) {
-            this.startBlock = startBlock; return this;
+        public Builder withStartBlock(Integer startBlock) {
+            this.startBlock = startBlock;
+            return this;
         }
 
-        public AccountConfigBuilder withEndBlock(Integer endBlock) {
-            this.endBlock = endBlock; return this;
+        public Builder withEndBlock(Integer endBlock) {
+            this.endBlock = endBlock;
+            return this;
         }
 
-        public AccountConfigBuilder withPage(Integer page) {
-            this.page = page; return this;
+        public Builder withPage(Integer page) {
+            this.page = page;
+            return this;
         }
 
-        public AccountConfigBuilder withOffset(Integer offset) {
-            this.offset = offset; return this;
+        public Builder withOffset(Integer offset) {
+            this.offset = offset;
+            return this;
         }
 
-        public AccountConfigBuilder withSort(String sort) {
-            this.sort = sort; return this;
+        public Builder withSort(String sort) {
+            this.sort = sort;
+            return this;
         }
 
         public TxConfig build() {
@@ -151,7 +168,7 @@ public class TxConfig {
             return txConfig;
         }
 
-        public TxConfig build(String action, String address) {
+        public TxConfig build(TxActionType action, String address) {
             return new TxConfig(action, address);
         }
 

@@ -1,6 +1,9 @@
 package org.crypto.bsc.account;
 
+import org.crypto.CSVReader;
+import org.crypto.CSVWriter;
 import org.crypto.HttpException;
+import org.crypto.report.TransactionEntry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,7 +65,26 @@ public class TxAccountService {
 
     }
 
+    /* from a TransactionList, write entries to a file */
+    public int writeTransactionsToCsv(List<Transaction> transactions, String fileName, boolean append) {
+        // write BscAccount results to a file
+        CSVWriter<Transaction> csvWriter = new CSVWriter<>();
+        String fileExt = " _transaction.csv";
+        try {
+            csvWriter.writeToCSV(fileName + fileExt, transactions, append);
+            return 1;
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return -1;
+    }
 
+    /* read from file and return a list of Transactions */
+    public List<String> readTransactionsFrom(String file) throws IOException {
+        // get file contents as a list
+        CSVReader csvReader = new CSVReader();
+        return csvReader.readFrom(file);
+    }
 
     //=== PROTECTED ==//
 
@@ -76,8 +98,10 @@ public class TxAccountService {
         // map key & value pairs into list of class instances
         if (actionType.equals(TX_LIST.label)) {
             return toTxListFrom(keyValuePairs);
+
         } else if (actionType.equals(TX_LIST_INTERNAL.label)) {
             return toTxInternalFrom(keyValuePairs);
+
         } else if (actionType.equals(TOKEN_TX.label)) {
             return toTxTokenFrom(keyValuePairs);
         }
@@ -86,62 +110,71 @@ public class TxAccountService {
     }
 
     /* create an instance of TxListTransaction from a map entry */
-    protected TxListTransaction toTxTokenFrom(Map<String, String> accountEntry) {
-        return new TxListTransaction.Builder()
-                .withBlockNumber(toInteger(accountEntry.get(BLOCK_NUMBER.label)))
-                .withTimeStamp(toDateTime(accountEntry.get(TIMESTAMP.label)))
-                .withHash(accountEntry.get(HASH.label))
-                .withFrom(accountEntry.get(FROM.label))
-                .withTo(accountEntry.get(TO.label))
-                .withValue(toDouble(accountEntry.get(VALUE.label)))
-                .withContractAddress(accountEntry.get(CONTRACT_ADDRESS.label))
-                .withInput(accountEntry.get(INPUT.label))
-                .withGas(toDouble(accountEntry.get(GAS.label)))
-                .withGasUsed(toDouble(accountEntry.get(GAS_USED.label)))
-                .withError(toBoolean(accountEntry.get(CONTRACT_ADDRESS.label)))
-                .withConfirmations(toLong(accountEntry.get(CONFIRMATIONS.label)))
+    protected TxTokenTransaction toTxTokenFrom(Map<String, String> entry) {
+        return new TxTokenTransaction.Builder()
+                .withBlockHash(entry.get(BLOCK_HASH.label))
+                .withBlockNumber(toInteger(entry.get(BLOCK_NUMBER.label)))
+                .withConfirmations(toInteger(entry.get(CONFIRMATIONS.label)))
+                .withContractAddress(entry.get(CONTRACT_ADDRESS.label))
+                .withCumulativeGasUsed(toInteger(entry.get(CONTRACT_ADDRESS.label)))
+                .withFrom(entry.get(FROM.label))
+                .withGas(toInteger(entry.get(GAS.label)))
+                .withGasPrice(toDouble(entry.get(GAS_PRICE.label)))
+                .withGasUsed(toInteger(entry.get(GAS_USED.label)))
+                .withHash(entry.get(HASH.label))
+                .withInput(entry.get(INPUT.label))
+                .withNonce(toInteger(entry.get(NONCE.label)))
+                .withTo(entry.get(TO.label))
+                .withTokenDecimal(toInteger(entry.get(TOKEN_DECIMAL.label)))
+                .withTokenName(entry.get(TOKEN_NAME.label))
+                .withTokenSymbol(entry.get(TOKEN_SYMBOL.label))
+                .withTransactionIndex(toInteger(entry.get(TRANSACTION_INDEX.label)))
+                .withValue(toLong(entry.get(VALUE.label)))
                 .build();
     }
 
     /* create an instance of TxInternalTransaction from a map entry */
-    protected TxInternalTransaction toTxInternalFrom(Map<String, String> accountEntry) {
+    protected TxInternalTransaction toTxInternalFrom(Map<String, String> entry) {
         return new TxInternalTransaction.Builder()
-                .withBlockNumber(toInteger(accountEntry.get(BLOCK_NUMBER.label)))
-                .withTimeStamp(toDateTime(accountEntry.get(TIMESTAMP.label)))
-                .withHash(accountEntry.get(HASH.label))
-                .withFrom(accountEntry.get(FROM.label))
-                .withTo(accountEntry.get(TO.label))
-                .withValue(toDouble(accountEntry.get(VALUE.label)))
-                .withContractAddress(accountEntry.get(CONTRACT_ADDRESS.label))
-                .withInput(accountEntry.get(INPUT.label))
-                .withGas(toInteger(accountEntry.get(GAS.label)))
-                .withGasUsed(toInteger(accountEntry.get(GAS_USED.label)))
-                .withError(toBoolean(accountEntry.get(IS_ERROR.label)))
+                .withBlockNumber(toInteger(entry.get(BLOCK_NUMBER.label)))
+                .withContractAddress(entry.get(CONTRACT_ADDRESS.label))
+                .withErrCode(entry.get(ERR_CODE.label))
+                .withFrom(entry.get(FROM.label))
+                .withGas(toInteger(entry.get(GAS.label)))
+                .withGasUsed(toInteger(entry.get(GAS_USED.label)))
+                .withHash(entry.get(HASH.label))
+                .withInput(entry.get(INPUT.label))
+                .withError(toBoolean(entry.get(IS_ERROR.label)))
+                .withTimeStamp(toDateTime(entry.get(TIMESTAMP.label)))
+                .withTo(entry.get(TO.label))
+                .withTraceId(entry.get(TRACE_ID.label))
+                .withType(entry.get(TYPE.label))
+                .withValue(toDouble(entry.get(VALUE.label)))
                 .build();
     }
 
     /* create an instance of TxTokenTransaction from a map entry */
-    protected TxTokenTransaction toTxListFrom(Map<String, String> accountEntry) {
-        return new TxTokenTransaction.Builder()
-                .withFunctionName(accountEntry.get(FUNCTION_NAME.label).replace(",", "::"))
-                .withBlockNumber(toInteger(accountEntry.get(BLOCK_NUMBER.label)))
-                .withHash(accountEntry.get(HASH.label))
-                .withFrom(accountEntry.get(FROM.label))
-                .withTo(accountEntry.get(TO.label))
-                .withValue(toLong(accountEntry.get(VALUE.label)))
-                .withContractAddress(accountEntry.get(CONTRACT_ADDRESS.label))
-                .withInput(accountEntry.get(INPUT.label))
-                .withGas(toInteger(accountEntry.get(GAS.label)))
-                .withGasUsed(toInteger(accountEntry.get(GAS_USED.label)))
-                .withNonce(toInteger(accountEntry.get(NONCE.label)))
-                .withBlockHash(accountEntry.get(BLOCK_HASH.label))
-                .withTokenName(accountEntry.get(TOKEN_NAME.label))
-                .withTokenSymbol(accountEntry.get(TOKEN_SYMBOL.label))
-                .withTokenDecimal(toInteger(accountEntry.get(TOKEN_DECIMAL.label)))
-                .withTransactionIndex(toInteger(accountEntry.get(TRANSACTION_INDEX.label)))
-                .withGasPrice(toDouble(accountEntry.get(GAS_PRICE.label)))
-                .withCumulativeGasUsed(toInteger(accountEntry.get(CONTRACT_ADDRESS.label)))
-                .withConfirmations(toInteger(accountEntry.get(CONFIRMATIONS.label)))
+    protected TxListTransaction toTxListFrom(Map<String, String> entry) {
+        return new TxListTransaction.Builder()
+                .withBlockHash(entry.get(BLOCK_HASH.label))
+                .withBlockNumber(toInteger(entry.get(BLOCK_NUMBER.label)))
+                .withConfirmations(toLong(entry.get(CONFIRMATIONS.label)))
+                .withContractAddress(entry.get(CONTRACT_ADDRESS.label))
+                .withCumulativeGasUsed(toInteger(entry.get(CONTRACT_ADDRESS.label)))
+                .withFrom(entry.get(FROM.label))
+                .withFunctionName(entry.get(FUNCTION_NAME.label).replace(",", "::"))
+                .withGas(toInteger(entry.get(GAS.label)))
+                .withGasPrice(toDouble(entry.get(GAS_PRICE.label)))
+                .withGasUsed(toInteger(entry.get(GAS_USED.label)))
+                .withHash(entry.get(HASH.label))
+                .withInput(entry.get(INPUT.label))
+                .withError(toBoolean(entry.get(IS_ERROR.label)))
+                .withNonce(toInteger(entry.get(NONCE.label)))
+                .withTimeStamp(toDateTime(entry.get(TIMESTAMP.label)))
+                .withTo(entry.get(TO.label))
+                .withTransactionIndex(toInteger(entry.get(TRANSACTION_INDEX.label)))
+                .withTxreceipt_status(toInteger(entry.get(TX_RECEIPT_STATUS.label)))
+                .withValue(toLong(entry.get(VALUE.label)))
                 .build();
     }
 

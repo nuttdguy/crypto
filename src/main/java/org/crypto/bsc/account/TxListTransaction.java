@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public class TxListTransaction extends Transaction {
 
     private int blockNumber;
+    private String functionName;
     private LocalDateTime timeStamp;
     private String hash;
     private int nonce;
@@ -28,23 +29,32 @@ public class TxListTransaction extends Transaction {
     }
 
     public String extractFieldValuesToWrite() {
-        return this.blockNumber + "," +
-                this.timeStamp + "," +
-                this.hash + "," +
-                this.from + "," +
-                this.to + "," +
-                this.value + "," +
+        return this.blockHash + "," +
+                this.blockNumber + "," +
+                this.confirmations + "," +
                 this.contractAddress + "," +
-                this.input + "," +
+                this.cumulativeGasUsed + "," +
+                this.from + "," +
+                this.functionName + "," +
                 this.gas + "," +
+                this.gasPrice + "," +
                 this.gasUsed + "," +
+                this.hash + "," +
+                this.input + "," +
                 this.isError + "," +
-                this.confirmations;
+                this.nonce + "," +
+                this.timeStamp + "," +
+                this.to + "," +
+                this.transactionIndex + "," +
+                this.txreceipt_status + "," +
+                this.value;
     }
 
     public int getBlockNumber() {
         return blockNumber;
     }
+
+    public String getFunctionName() { return functionName; }
 
     public LocalDateTime getTimeStamp() {
         return timeStamp;
@@ -117,6 +127,7 @@ public class TxListTransaction extends Transaction {
     public static class Builder {
 
         private int blockNumber;
+        private String functionName;
         private LocalDateTime timeStamp;
         private String hash;
         private int nonce;
@@ -137,6 +148,11 @@ public class TxListTransaction extends Transaction {
 
         public Builder withBlockNumber(int blockNumber) {
             this.blockNumber = blockNumber;
+            return this;
+        }
+
+        public Builder withFunctionName(String functionName) {
+            this.functionName = functionName;
             return this;
         }
 
@@ -228,6 +244,7 @@ public class TxListTransaction extends Transaction {
         public TxListTransaction build() {
             TxListTransaction txList = new TxListTransaction();
             txList.blockNumber = this.blockNumber;
+            txList.functionName = this.functionName;
             txList.timeStamp = this.timeStamp;
             txList.hash = this.hash;
             txList.nonce = this.nonce;
