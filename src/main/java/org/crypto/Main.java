@@ -1,7 +1,6 @@
 package org.crypto;
 
 import org.crypto.bsc.BscApi;
-import org.crypto.bsc.account.Transaction;
 import org.crypto.bsc.account.TxActionType;
 import org.crypto.bsc.account.TxConfig;
 import org.crypto.bsc.account.TxTokenTransaction;
@@ -45,7 +44,12 @@ public class Main {
 
     }
 
-    public static void fetchBsc() {
+    public static void executeReportMethods() {
+        // to implement
+
+    }
+
+    public static void executeBscMethods() {
         // init and set config object
         BscApi bscApi = new BscApi();
 
@@ -75,7 +79,6 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
     }
 

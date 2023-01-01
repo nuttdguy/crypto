@@ -1,6 +1,6 @@
 package org.crypto.report;
 
-import org.crypto.bsc.account.Transaction;
+import org.crypto.Transaction;
 
 import java.time.LocalDateTime;
 

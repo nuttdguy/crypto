@@ -1,6 +1,8 @@
 package org.crypto.bsc.account;
 
 
+import org.crypto.Transaction;
+
 public class TxTokenTransaction extends Transaction {
 
     private int blockNumber;

@@ -1,7 +1,7 @@
 package org.crypto.bsc;
 
 
-import org.crypto.bsc.account.Transaction;
+import org.crypto.Transaction;
 import org.crypto.bsc.account.TxActionType;
 import org.crypto.bsc.account.TxConfig;
 import org.crypto.bsc.account.TxAccountService;
@@ -25,7 +25,6 @@ public class BscApi {
 
     //== DECLARED FIELDS ==//
     private final String jsonResourceKey = "result";
-
     private final TxAccountService txAccountService = new TxAccountService();
 
 

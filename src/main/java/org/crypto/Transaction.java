@@ -1,4 +1,4 @@
-package org.crypto.bsc.account;
+package org.crypto;
 
 public class Transaction {
 

@@ -1,6 +1,6 @@
 package org.crypto.quote;
 
-import org.crypto.bsc.account.Transaction;
+import org.crypto.Transaction;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

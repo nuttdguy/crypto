@@ -1,5 +1,7 @@
 package org.crypto.bsc.account;
 
+import org.crypto.Transaction;
+
 import java.time.LocalDateTime;
 
 public class TxInternalTransaction extends Transaction {

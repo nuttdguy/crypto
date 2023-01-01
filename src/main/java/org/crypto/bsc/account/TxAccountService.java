@@ -3,6 +3,7 @@ package org.crypto.bsc.account;
 import org.crypto.CSVReader;
 import org.crypto.CSVWriter;
 import org.crypto.HttpException;
+import org.crypto.Transaction;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +25,6 @@ import static org.crypto.util.JsonUtil.*;
 
 /* service class to fetch /?module=account resource from bsc explorer api */
 public class TxAccountService {
-
 
 
     /* create a mapped entry from a header and file contents */
