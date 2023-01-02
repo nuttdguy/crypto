@@ -73,8 +73,17 @@ public class Report {
         return reportService.extractUniqueValuesFrom(field, mapEntries);
     }
 
-
-    public int readFromFileAndThenWriteReports(String toReadFileName, String outputFileName) {
+    /* program method to read from a file, then generate 2 reports for each symbol
+    *  desc: when a supported file is passed into this method, this method produces reports for all the unique symbols
+    *       report 1: generates a report showing all buys and sells for each ticker symbol having an output file name [symbol]_transaction.csv
+    *                    e.g. ada3s-usdt_transactions
+    *       report 2: generates a summary report showing the accumulated buys, sells, profit and loss having file name [symbol]_report_transaction.csv
+    *                   e.g. ada3s-usdt_report_transactions
+    *       report 3: generates a report showing report 2 summaries in a single csv file having the summaryOutputFileName
+    *   toReadFileName: name of the csv file to read
+    *   summaryOutputFileName: file name for the summary report for all symbols
+    * . */
+    public int readFromFileAndThenWriteReports(String toReadFileName, String summaryOutputFileName) {
         List<Map<String, String>> entries; // return a list of mapped entries
         List<KucoinSpotTradeTransaction> transactionList = new ArrayList<>();  // return a list of transaction objects for the requested token symbol
         double boughtTotalAccum = 0.0, soldTotalAccum = 0.0, profitLossAccum = 0.0;
@@ -86,50 +95,52 @@ public class Report {
             // returns mapped entries for every row in the file
             entries = mapToTransactionsFrom(readTransactionsFrom(toReadFileName));
 
-            // insert option loc 1 :: calculate and add additional key value pairs
+            // extract the unique values for key set Symbol
             Set<String> tickerSymbolSet = extractUniqueValuesFrom(FIELD, entries);
 
-
+            // iterate through unique ticker symbol set and generate a report for each symbol
             for (String tickerSymbol : tickerSymbolSet) {
+
                 // create list for a single symbol - or use for loop to iterate through every unique symbol found
                 transactionList = createListOfTransactionsMatchingFieldAndSymbol(FIELD, tickerSymbol, entries, KUCOIN_SPOT_TRADE);
 
-                // insert option loc 2 : OR calculate and add additional key value pairs here with class to handle report
+                // create a profit and loss report for the current ticker symbol
                 ProfitAndLossReport plReport = createProfitLossReportFrom(transactionList);
 
-                // generate accumulative summary
+                // track accumulative values for all ticker symbols
                 boughtTotalAccum += plReport.getBoughtAmount();
                 soldTotalAccum += plReport.getSoldAmount();
                 profitLossAccum += plReport.getProfitLoss();
 
-                // add the report to the list
-                List<ProfitAndLossReport> plReports = List.of(plReport);
-
-                // write transactions to csv
+                // write the current transactionList to csv file
                 writeTransactionsToCsv(transactionList, transactionList.get(0).getSymbol().toLowerCase(), false, true);
 
-                // write profit and loss summaries to csv
+                // write profit and loss summaries to csv, include header for first iteration and generate new
                 if (includeHeader) {
-                    writeTransactionsToCsv(plReports, outputFileName, false, true);
+                    writeTransactionsToCsv(List.of(plReport), summaryOutputFileName, false, true);
                     includeHeader = false;
                 } else {
-                    writeTransactionsToCsv(plReports, outputFileName, true, false);
+                    // append summary reports for subsequent ticker symbols
+                    writeTransactionsToCsv(List.of(plReport), summaryOutputFileName, true, false);
                 }
             }
 
             // add final accumulative values to the report
             Map<String, String> summary = createProfitAndLossSummary(boughtTotalAccum, soldTotalAccum, profitLossAccum);
-            writeTransactionsToCsv(List.of(summary), outputFileName, true);
+            writeTransactionsToCsv(List.of(summary), summaryOutputFileName, true);
 
-            out.println(transactionList);
 
         } catch (IOException ex) {
             ex.printStackTrace();
+            return -1; // return -1 if an exception is caught
         }
 
+        // return 1 when write operation was successful
         return 1;
     }
 
+    // todo - refactor
+    /* sums the transactions and generates a general profit and loss report */
     public ProfitAndLossReport createProfitLossReportFrom(List<KucoinSpotTradeTransaction> transactionList) {
         Map<String, String> profitLossReport = new HashMap<>();
         String[] fields = new String[]{"Symbol", "BoughtQty", "BoughtAmount", "SoldQty", "SoldAmount", "ProfitLoss", "RemainQty", "ReportDate"};
@@ -180,7 +191,8 @@ public class Report {
                 .build();
     }
 
-    public Map<String, String> createProfitAndLossSummary(double boughtAmountAccum, double soldAmountAccum, double profitLossAccum) {
+    /* create a map entry for the accumulated buy, sell, profit of all symbols */
+    protected Map<String, String> createProfitAndLossSummary(double boughtAmountAccum, double soldAmountAccum, double profitLossAccum) {
         Map<String, String> accumSummary = new HashMap<>();
         accumSummary.put("BoughtAmountAccum", String.valueOf(boughtAmountAccum));
         accumSummary.put("SoldAmountAccum", String.valueOf(soldAmountAccum));
