@@ -1,11 +1,13 @@
 package org.crypto.quote;
 
+import org.crypto.Transaction;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Quote {
+public class Quote extends Transaction {
 
     private int id;
     private String name;

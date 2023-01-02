@@ -142,12 +142,12 @@ public class TxAccountService {
 
 
     /* from a TransactionList, write entries to a file */
-    public int writeTransactionsToCsv(List<Transaction> transactions, String fileName, boolean append) {
+    public int writeTransactionsToCsv(List<Transaction> transactions, String fileName, boolean append, boolean includeHeader) {
         // write BscAccount results to a file
-        CSVWriter<Transaction> csvWriter = new CSVWriter<>();
+        CSVWriter csvWriter = new CSVWriter();
         String fileExt = "_transactions.csv";
         try {
-            csvWriter.writeToCSV(fileName + fileExt, transactions, append);
+            csvWriter.writeToCSV(fileName + fileExt, transactions, append, includeHeader);
             return 1;
         } catch(Exception ex) {
             ex.printStackTrace();

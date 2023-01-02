@@ -11,26 +11,26 @@ import org.crypto.report.upload.ProfitAndLossReport;
 import java.io.*;
 import java.util.*;
 
-public class CSVWriter<T> {
+public class CSVWriter {
 
     public CSVWriter() {
         // nothing to implement
     }
 
-    //== TODO -- FIX AND EXTRACT AND BREAK OUT WRITE SECTION
+    public List<String> extractMemberFieldsOf(Class<?> clazz, boolean sort) {
+        // extract and sort the header row columns
+        List<String> fieldList = ClassFieldExtractor.extractDeclaredFields(clazz);
+        if (sort)
+            Collections.sort(fieldList);
+        return fieldList;
+    }
+
+
     /* Write */
-    public void writeToCSV(String fileName, List<T> clazzList,  boolean append) throws IOException {
+    public <T extends Transaction> void writeToCSV(String fileName, List<T> transactionList, boolean append, boolean includeHeader) throws IOException {
 
         // return when list is empty
-        if (clazzList.isEmpty()) { return; }
-
-        // get the class name and fields to use as header row
-        String clazzName = clazzList.get(0).getClass().getName();
-        List<String> fieldList = ClassFieldExtractor.extractDeclaredFields(clazzList.get(0).getClass());
-        // sort the header row columns
-        Collections.sort(fieldList);
-        String fields = String.join(",", fieldList);
-
+        if (transactionList.isEmpty()) { return; }
 
         // get the current directory, append to the filename
         String currentDirectory = System.getProperty("user.dir");
@@ -39,34 +39,43 @@ public class CSVWriter<T> {
         // write the file the current user dir
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullFileName, append))) {
 
-            writer.write(fields);
-            writer.newLine();
-            for (T clazz : clazzList) {
-                String dataToWrite = "";
+            // include the header row ?
+            if (includeHeader) {
+                // extract member fields of the class to use as header row
+                String fields = String.join(",", extractMemberFieldsOf(transactionList.get(0).getClass(), true));
+                writer.write(fields);
+                writer.newLine();
+            }
 
-                if (clazzName.contains("Quote")) {
-                    dataToWrite = ((Quote) clazz).extractFieldValuesToWrite();
-                } else if (clazzName.contains("TxInternalTransaction")) {
-                    dataToWrite = ((TxInternalTransaction) clazz).extractFieldValuesToWrite();
-                } else if (clazzName.contains("TxListTransaction")) {
-                    dataToWrite = ((TxListTransaction) clazz).extractFieldValuesToWrite();
-                } else if (clazzName.contains("TxTokenTransaction")) {
-                    dataToWrite = ((TxTokenTransaction) clazz).extractFieldValuesToWrite();
-                } else if (clazzName.contains("TransactionEntry")) {
-                    dataToWrite = ((TransactionEntry) clazz).extractFieldValuesToWrite();
-                } else if (clazzName.contains("KucoinSpotTradeTransaction")) {
-                    dataToWrite = ((KucoinSpotTradeTransaction) clazz).extractFieldValuesToWrite();
-                } else if (clazzName.contains("ProfitAndLossReport")) {
-                    dataToWrite = ((ProfitAndLossReport) clazz).extractFieldValuesToWrite();
-                }
+            for (T transaction : transactionList) {
 
+                String dataToWrite = ToMapper.extractFieldValuesToWrite(transaction);
                 writer.write(dataToWrite);
                 writer.newLine();
             }
         }
     }
 
-    /* TODO FIX -- HOW CAN YOU GUARANTEE THE ORDER :: DATA IS NOT IN ALIGNMENT WITH HEADER FIELDS */
+
+    public void writeToCSV(List<Map<String, String>> mapEntries, String fileName, boolean append) throws IOException {
+        // get the current directory, append to the filename
+        String currentDirectory = System.getProperty("user.dir");
+        String fullFileName = currentDirectory + File.separator + fileName;
+
+
+        // write the file the current user dir
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullFileName, append))) {
+
+            for (Map<String, String> entry : mapEntries) {
+
+                writer.write(entry.toString() + ",");
+                writer.newLine();
+            }
+
+        }
+    }
+
+
     /* extract and merge the content from multiple files by row  */
     public List<String> mergeCSVIntoMappedEntries(List<String> files) {
         // store file data into a single string
@@ -94,7 +103,6 @@ public class CSVWriter<T> {
         }
 
         // remove trailing comma
-//        headerRowFields = headerRowFields.substring(0, headerRowFields.length()-1);
         fileContent.add(headerRowFields);
 
         StringBuilder sb = new StringBuilder();

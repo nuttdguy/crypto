@@ -1,13 +1,11 @@
 package org.crypto;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.crypto.report.TradeInstanceType;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.lang.String.format;
 import static org.crypto.util.JsonUtil.mapObjectsToString;
@@ -16,29 +14,21 @@ import static org.crypto.util.JsonUtil.toJsonObject;
 public interface IReportService {
 
     /* create a mapped entry from a header and file contents */
-    public List<Map<String, String>> createMappedEntriesFrom(String[] headerRow, String[] fileContent);
+    public List<Map<String, String>> createMappedEntriesFrom(String[] headerCol, String fileContent,String fRowDelimiter, String fColDelimiter);
 
-    /* creates a Transaction class instance matching the Api Action= type  */
-    public Transaction createTransactionInstance(JSONObject jsonObject, String actionType);
+    /* form a list of mapped entries, create a transaction list */
+    public <T extends Transaction> List<T> createTransactionsByFieldAndSymbol(String field, String tickerSymbol, List<Map<String, String>> mapEntries, TradeInstanceType tradeInstanceType);
 
     /* creates a Transaction class instance from a mapped entry  */
-    public Transaction createTransactionInstance(Map<String, String> mapEntry, String actionType);
-
-    /* from json array resource, create a Transaction for every element and return the List */
-    public List<Transaction> createTransactionListFrom(JSONArray resourceArray, String actionType);
-
-    /* fetch and get the data from the resource endpoint with params */
-    public InputStream fetchApiResource(String resourceUrl, String resourceParams, String APIKEY) throws IOException;
-
-    /* from resource stream, extract the json array using the resource object key */
-    public JSONArray extractJsonArrayFrom(InputStream resourceStream, String resourceObjectKey) throws JSONException, IOException;
+    public Transaction createTransactionInstance(Map<String, String> mapEntry, TradeInstanceType tradeInstanceType);
 
     /* read from file and return a list of Transactions */
-    public List<String> readTransactionsFrom(String file) throws IOException;
+    public List<String> retrieveTransactionsFrom(String file) throws IOException;
 
-    public <T extends Transaction> int writeTransactionsToCsv(List<T> transactionList, String fileName, boolean append);
+    public <T extends Transaction> int writeTransactionsToCsv(List<T> transactionList, String fileName, boolean append, boolean includeHeader);
 
     /* from a TransactionList, write entries to a file */
-//    public int writeTransactionsToCsv(List<Transaction> transactions, String fileName, boolean append);
+    public int writeTransactionsToCsv(List<Map<String, String>> mapEntries, String fileName, boolean append);
 
+    public Set<String> extractUniqueValuesFrom(String field, List<Map<String, String>> mapEntries);
 }

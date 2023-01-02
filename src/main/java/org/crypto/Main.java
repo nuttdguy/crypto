@@ -7,17 +7,12 @@ import org.crypto.bsc.account.TxTokenTransaction;
 import org.crypto.quote.Quote;
 import org.crypto.quote.QuoteConfig;
 import org.crypto.report.Report;
-import org.crypto.report.TradeSourceType;
 import org.crypto.report.TransactionEntry;
-import org.crypto.report.upload.KucoinSpotTradeTransaction;
-import org.crypto.report.upload.ProfitAndLossReport;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static java.lang.System.out;
-import static org.crypto.report.TradeSourceType.KUCOIN_SPOT_TRADE;
 import static org.crypto.util.DataTypeUtil.*;
 
 
@@ -58,81 +53,10 @@ public class Main {
         Report report = new Report();
 
         // extract data from csv
-        List<Map<String, String>> entries; // return a list of mapped entries
-        List<KucoinSpotTradeTransaction> transactionList = new ArrayList<>();  // return a list of transaction objects for the requested token symbol
-        Map<String, String> profitLossReport = new HashMap<>();
-//        String[] symbolsToExtract = new String[]{"ADA3L-USDT, ADA3S-USDT"}
-        try {
+        int isSuccess = report.readFromFileAndThenWriteReports(
+                "2022_kucoin_spot_all.csv", "2022_summary_report");
 
-            // returns mapped entries for every row in the file
-            entries = report.extractTransactionsFrom("2022_kucoin_spot_all.csv");
-
-            // insert option loc 1 :: calculate and add additional key value pairs
-
-            // create list for a single symbol - or use for loop to iterate through every unique symbol found
-            transactionList = report.createTransactionsBySymbol(entries, "ADA3L-USDT", KUCOIN_SPOT_TRADE);
-
-            // insert option loc 2 : OR calculate and add additional key value pairs here with class to handle report
-
-            profitLossReport.put("Symbol", transactionList.get(0).getSymbol());
-
-            profitLossReport.put("BoughtQty", String.valueOf(transactionList
-                    .stream()
-                    .filter(entry -> entry.getSide().equals("BUY"))
-                    .map(KucoinSpotTradeTransaction::getFilledAmount)
-                    .reduce(0.00, Double::sum)));
-
-            profitLossReport.put("SoldQty", String.valueOf(transactionList
-                    .stream()
-                    .filter(entry -> entry.getSide().equals("SELL"))
-                    .map(KucoinSpotTradeTransaction::getFilledAmount)
-                    .reduce(0.00, Double::sum)));
-
-            profitLossReport.put("BoughtTotal", String.valueOf(transactionList
-                    .stream()
-                    .filter(entry -> entry.getSide().equals("BUY"))
-                    .map(KucoinSpotTradeTransaction::getFilledVolumeUsdt)
-                    .reduce(0.00, Double::sum)));
-
-            profitLossReport.put("SoldTotal", String.valueOf(transactionList
-                    .stream()
-                    .filter(entry -> entry.getSide().equals("SELL"))
-                    .map(KucoinSpotTradeTransaction::getFilledVolumeUsdt)
-                    .reduce(0.00, Double::sum)));
-
-            profitLossReport.put("ProfitLoss", String.valueOf(
-                    toDouble(profitLossReport.get("SoldTotal")) - toDouble(profitLossReport.get("BoughtTotal"))));
-
-            profitLossReport.put("RemainQty", String.valueOf(
-                    toDouble(profitLossReport.get("BoughtQty")) - toDouble(profitLossReport.get("SoldQty"))));
-
-            profitLossReport.put("ReportDate", LocalDateTime.now().toString());
-
-            List<ProfitAndLossReport> plReports = List.of(ProfitAndLossReport.builder()
-                            .symbol(profitLossReport.get("Symbol"))
-                            .boughtQty(toDouble(profitLossReport.get("BoughtQty")))
-                            .boughtTotal(toDouble(profitLossReport.get("BoughtTotal")))
-                            .soldQty(toDouble(profitLossReport.get("SoldQty")))
-                            .soldTotal(toDouble(profitLossReport.get("SoldTotal")))
-                            .profitLoss(toDouble(profitLossReport.get("ProfitLoss")))
-                            .remainQty(toDouble(profitLossReport.get("RemainQty")))
-                            .reportDate(toDateTime(profitLossReport.get("ReportDate")))
-                            .build()
-            );
-
-            // write transactions to csv
-            report.writeTransactionsToCsv(transactionList, transactionList.get(0).getSymbol().toLowerCase(), false);
-            report.writeTransactionsToCsv(plReports, plReports.get(0).getSymbol().toLowerCase()+"_report", false);
-
-
-            out.println(transactionList);
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-        // aggregate and consolidate results, group by token symbol
-
+        out.println(isSuccess);
 
     }
 
@@ -152,7 +76,7 @@ public class Main {
                 // fetch transactions for all TxActionTypes
                 transactionList = bscApi.fetchTxTransactions(txConfig);
                 // write the transaction to file
-                writeSuccess += bscApi.writeTransactionsToCsv(transactionList, action.label, false);
+                writeSuccess += bscApi.writeTransactionsToCsv(transactionList, action.label, false, true );
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -312,9 +236,9 @@ public class Main {
         List<Quote> quoteList = cmcApi.fetchLatestQuotes(config);
 
         // write quote results to a file
-        CSVWriter<Quote> quoteCSVWriter = new CSVWriter<>();
+        CSVWriter quoteCSVWriter = new CSVWriter();
         try {
-            quoteCSVWriter.writeToCSV("crypto_quotes.csv", quoteList, false);
+            quoteCSVWriter.writeToCSV("crypto_quotes.csv", quoteList, false, true);
 
         } catch(Exception ex) {
             ex.printStackTrace();

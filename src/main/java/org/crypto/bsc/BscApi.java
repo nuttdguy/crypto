@@ -87,8 +87,8 @@ public class BscApi {
     }
 
     /* from a TransactionList, write entries to a file with _transactions.csv appended to the fileName */
-    public int writeTransactionsToCsv(List<Transaction> transactionList, String fileName, boolean append) {
-        return txAccountService.writeTransactionsToCsv(transactionList, fileName, append);
+    public int writeTransactionsToCsv(List<Transaction> transactionList, String fileName, boolean append, boolean includeHeader) {
+        return txAccountService.writeTransactionsToCsv(transactionList, fileName, append, includeHeader);
     }
 
 
