@@ -5,6 +5,7 @@ import org.crypto.bsc.account.TxListTransaction;
 import org.crypto.bsc.account.TxTokenTransaction;
 import org.crypto.quote.Quote;
 import org.crypto.report.TransactionEntry;
+import org.crypto.report.upload.KucoinSpotTradeTransaction;
 
 import java.io.*;
 import java.util.*;
@@ -52,6 +53,8 @@ public class CSVWriter<T> {
                     dataToWrite = ((TxTokenTransaction) clazz).extractFieldValuesToWrite();
                 } else if (clazzName.contains("TransactionEntry")) {
                     dataToWrite = ((TransactionEntry) clazz).extractFieldValuesToWrite();
+                } else if (clazzName.contains("KucoinSpotTradeTransaction")) {
+                    dataToWrite = ((KucoinSpotTradeTransaction) clazz).extractFieldValuesToWrite();
                 }
 
                 writer.write(dataToWrite);

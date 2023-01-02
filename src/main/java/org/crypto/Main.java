@@ -6,12 +6,16 @@ import org.crypto.bsc.account.TxConfig;
 import org.crypto.bsc.account.TxTokenTransaction;
 import org.crypto.quote.Quote;
 import org.crypto.quote.QuoteConfig;
+import org.crypto.report.Report;
+import org.crypto.report.TradeSourceType;
 import org.crypto.report.TransactionEntry;
+import org.crypto.report.upload.KucoinSpotTradeTransaction;
 
 import java.io.IOException;
 import java.util.*;
 
 import static java.lang.System.out;
+import static org.crypto.report.TradeSourceType.KUCOIN_SPOT_TRADE;
 import static org.crypto.util.DataTypeUtil.*;
 
 
@@ -21,6 +25,9 @@ public class Main {
 
         // fetch quotes
 //        fetchQuote();
+
+        // uploaded files
+        executeReportMethods();
 
 
         // generate single report file
@@ -46,6 +53,40 @@ public class Main {
 
     public static void executeReportMethods() {
         // to implement
+        Report report = new Report();
+
+        // extract data from csv
+        List<Map<String, String>> entries; // return a list of mapped entries
+        List<KucoinSpotTradeTransaction> transactionList = new ArrayList<>();  // return a list of transaction objects for the requested token symbol
+        Map<String, String> profitLossReport = new HashMap<>();
+//        String[] symbolsToExtract = new String[]{"ADA3L-USDT, ADA3S-USDT"}
+        try {
+
+            // returns mapped entries for every row in the file
+            entries = report.extractTransactionsFrom("2022_kucoin_spot_all.csv");
+
+            // insert option loc 1 :: calculate and add additional key value pairs
+
+            // create list for a single symbol - or use for loop to iterate through every unique symbol found
+            transactionList = report.createTransactionsBySymbol(entries, "ADA3L-USDT", KUCOIN_SPOT_TRADE);
+
+            // insert option loc 2 : OR calculate and add additional key value pairs here with class to handle report
+            for (Transaction transaction : transactionList) {
+
+            }
+
+
+            // write transactions to csv
+            report.writeTransactionsToCsv(transactionList, transactionList.get(0).getSymbol().toLowerCase(), false);
+
+            out.println(transactionList);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        // aggregate and consolidate results, group by token symbol
+
 
     }
 

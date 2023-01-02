@@ -3,9 +3,14 @@ package org.crypto.util;
 import org.json.JSONArray;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import static java.lang.System.out;
 
 public class DataTypeUtil {
 
@@ -71,8 +76,22 @@ public class DataTypeUtil {
     }
 
     public static LocalDateTime toDateTime(String dateTime) {
-        String dt = dateTime.replace(" ", "T");
-        return isLocalDateTime(dt) ? LocalDateTime.parse(dt) : LocalDateTime.now();
+        dateTime = dateTime.replace("-", "/");
+        DateTimeFormatter formatter;
+        try {
+            dateTime = dateTime.replace(" ", "T");
+            formatter = DateTimeFormatter.ofPattern("d/MMM/yy HH:mm:ss", Locale.US);
+            return LocalDateTime.parse(dateTime + " 00:00:00", formatter);
+        } catch (DateTimeParseException ex) {
+//            out.println(ex.getLocalizedMessage());
+        }
+        try {
+            formatter = DateTimeFormatter.ofPattern("M/dd/yyyy H:mm", Locale.US);
+            return LocalDateTime.parse(dateTime, formatter);
+        }  catch (DateTimeParseException ex) {
+//            out.println(ex.getLocalizedMessage());
+        }
+        return LocalDateTime.now();
     }
 
     public static Boolean toBoolean(String value) {

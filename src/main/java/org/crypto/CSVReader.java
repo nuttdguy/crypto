@@ -62,12 +62,12 @@ public class CSVReader {
 
                     if (addHeaderRow) {
                         // add the header row as a list element
-                        fileContent.add(line);
+                        fileContent.add(line.trim());
                         addHeaderRow = false;
                         continue;
                     }
                     // append every line to the previous line
-                    sb.append(line).append(":ENDLINE");
+                    sb.append(line.trim()).append(":ENDLINE");
                 }
                 // add the string-builder content string as a list element
                 fileContent.add(sb.toString());

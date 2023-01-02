@@ -2,7 +2,8 @@ package org.crypto.report;
 
 import org.crypto.IReportService;
 import org.crypto.Transaction;
-import org.crypto.bsc.account.TxActionType;
+import org.crypto.exchange.kucoin.ActionType;
+import org.crypto.report.upload.KucoinSpotTradeTransaction;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -23,36 +24,31 @@ public class Report {
         return reportService.createMappedEntriesFrom(headerRow, fileContent);
     }
 
-    /* from the file contents, returns a list of transactions */
-    public List<Transaction> extractTransactionsFrom(String file, Class<? extends Transaction> clazz) throws IOException {
-
-        // read and return the file contents
-        List<String> fileContents = reportService.readTransactionsFrom(file);
-
-        String actionType = "";
-        String[] clazzNameParts = clazz.getSimpleName().split("\\.");
-
-        // determine the transaction type to create
-        switch (clazzNameParts[clazzNameParts.length-1]) {
-            case "TxTokenTransaction" -> actionType = TxActionType.TOKEN_TX.label;
-            case "TxListTransaction" -> actionType = TxActionType.TX_LIST.label;
-            case "TxInternalTransaction" -> actionType = TxActionType.TX_LIST_INTERNAL.label;
-            default -> throw new RuntimeException(format("%s is not supported", clazzNameParts[clazzNameParts.length-1]));
-        }
-
-        // transform file contents into mapped entries
-        List<Map<String, String>> entries = reportService.createMappedEntriesFrom(fileContents.get(0).split(","), fileContents.get(1).split("/n/r"));
-
+    /* from list of mapped entries; create a transaction list matching the symbol */
+    public <T extends Transaction> List<T> createTransactionsBySymbol(List<Map<String, String>> mapEntries, String tickerSymbol, TradeSourceType tradeSourceType) {
         // extract the file contents from the second element
-        List<Transaction> transactionList = new ArrayList<>();
-        for (Map<String, String> entry : entries) {
-            Transaction transaction = reportService.createTxTransaction(entry, actionType);
-            transactionList.add(transaction);
-        }
+        List<T> transactionList = new ArrayList<>();
 
-        // return the list of transactions
+        for (Map<String, String> entry : mapEntries) {
+            String symbolValue = entry.get("Symbol");
+            if (symbolValue.equals(tickerSymbol)) {
+                T transaction = (T) reportService.createTransactionInstance(entry, tradeSourceType.label);
+                transactionList.add(transaction);
+            }
+        }
         return transactionList;
     }
+
+    /* from the file, create and return a list of mapped entries */
+    public List<Map<String, String>> extractTransactionsFrom(String file) throws IOException {
+        // read and return the file contents
+        List<String> fileContents = reportService.readTransactionsFrom(file);
+        return reportService.createMappedEntriesFrom(fileContents.get(0).split(","), fileContents.get(1).split("/n/r"));
+    }
+
+
+
+
 
     /* read from file and return contents as String elements */
     public List<String> readTransactionsFrom(String file) throws IOException {
@@ -61,7 +57,7 @@ public class Report {
     }
 
     /* from a TransactionList, write entries to a file with _transactions.csv appended to the fileName */
-    public int writeTransactionsToCsv(List<Transaction> transactionList, String fileName, boolean append) {
+    public <T extends Transaction> int writeTransactionsToCsv(List<T> transactionList, String fileName, boolean append) {
         return reportService.writeTransactionsToCsv(transactionList, fileName, append);
     }
 

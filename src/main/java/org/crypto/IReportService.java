@@ -6,16 +6,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.crypto.bsc.account.TxActionType.*;
-import static org.crypto.bsc.account.TxActionType.TOKEN_TX;
 import static org.crypto.util.JsonUtil.mapObjectsToString;
 import static org.crypto.util.JsonUtil.toJsonObject;
 
@@ -25,10 +19,10 @@ public interface IReportService {
     public List<Map<String, String>> createMappedEntriesFrom(String[] headerRow, String[] fileContent);
 
     /* creates a Transaction class instance matching the Api Action= type  */
-    public Transaction createTxTransaction(JSONObject jsonObject, String actionType);
+    public Transaction createTransactionInstance(JSONObject jsonObject, String actionType);
 
     /* creates a Transaction class instance from a mapped entry  */
-    public Transaction createTxTransaction(Map<String, String> mapEntry, String actionType);
+    public Transaction createTransactionInstance(Map<String, String> mapEntry, String actionType);
 
     /* from json array resource, create a Transaction for every element and return the List */
     public List<Transaction> createTransactionListFrom(JSONArray resourceArray, String actionType);
@@ -42,7 +36,9 @@ public interface IReportService {
     /* read from file and return a list of Transactions */
     public List<String> readTransactionsFrom(String file) throws IOException;
 
+    public <T extends Transaction> int writeTransactionsToCsv(List<T> transactionList, String fileName, boolean append);
+
     /* from a TransactionList, write entries to a file */
-    public int writeTransactionsToCsv(List<Transaction> transactions, String fileName, boolean append);
+//    public int writeTransactionsToCsv(List<Transaction> transactions, String fileName, boolean append);
 
 }

@@ -1,5 +1,8 @@
 package org.crypto;
 
+import lombok.Getter;
+
+@Getter
 public class Transaction {
 
 //    protected int blockNumber;
