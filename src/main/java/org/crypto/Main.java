@@ -10,8 +10,10 @@ import org.crypto.report.Report;
 import org.crypto.report.TradeSourceType;
 import org.crypto.report.TransactionEntry;
 import org.crypto.report.upload.KucoinSpotTradeTransaction;
+import org.crypto.report.upload.ProfitAndLossReport;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static java.lang.System.out;
@@ -71,13 +73,57 @@ public class Main {
             transactionList = report.createTransactionsBySymbol(entries, "ADA3L-USDT", KUCOIN_SPOT_TRADE);
 
             // insert option loc 2 : OR calculate and add additional key value pairs here with class to handle report
-            for (Transaction transaction : transactionList) {
 
-            }
+            profitLossReport.put("Symbol", transactionList.get(0).getSymbol());
 
+            profitLossReport.put("BoughtQty", String.valueOf(transactionList
+                    .stream()
+                    .filter(entry -> entry.getSide().equals("BUY"))
+                    .map(KucoinSpotTradeTransaction::getFilledAmount)
+                    .reduce(0.00, Double::sum)));
+
+            profitLossReport.put("SoldQty", String.valueOf(transactionList
+                    .stream()
+                    .filter(entry -> entry.getSide().equals("SELL"))
+                    .map(KucoinSpotTradeTransaction::getFilledAmount)
+                    .reduce(0.00, Double::sum)));
+
+            profitLossReport.put("BoughtTotal", String.valueOf(transactionList
+                    .stream()
+                    .filter(entry -> entry.getSide().equals("BUY"))
+                    .map(KucoinSpotTradeTransaction::getFilledVolumeUsdt)
+                    .reduce(0.00, Double::sum)));
+
+            profitLossReport.put("SoldTotal", String.valueOf(transactionList
+                    .stream()
+                    .filter(entry -> entry.getSide().equals("SELL"))
+                    .map(KucoinSpotTradeTransaction::getFilledVolumeUsdt)
+                    .reduce(0.00, Double::sum)));
+
+            profitLossReport.put("ProfitLoss", String.valueOf(
+                    toDouble(profitLossReport.get("SoldTotal")) - toDouble(profitLossReport.get("BoughtTotal"))));
+
+            profitLossReport.put("RemainQty", String.valueOf(
+                    toDouble(profitLossReport.get("BoughtQty")) - toDouble(profitLossReport.get("SoldQty"))));
+
+            profitLossReport.put("ReportDate", LocalDateTime.now().toString());
+
+            List<ProfitAndLossReport> plReports = List.of(ProfitAndLossReport.builder()
+                            .symbol(profitLossReport.get("Symbol"))
+                            .boughtQty(toDouble(profitLossReport.get("BoughtQty")))
+                            .boughtTotal(toDouble(profitLossReport.get("BoughtTotal")))
+                            .soldQty(toDouble(profitLossReport.get("SoldQty")))
+                            .soldTotal(toDouble(profitLossReport.get("SoldTotal")))
+                            .profitLoss(toDouble(profitLossReport.get("ProfitLoss")))
+                            .remainQty(toDouble(profitLossReport.get("RemainQty")))
+                            .reportDate(toDateTime(profitLossReport.get("ReportDate")))
+                            .build()
+            );
 
             // write transactions to csv
             report.writeTransactionsToCsv(transactionList, transactionList.get(0).getSymbol().toLowerCase(), false);
+            report.writeTransactionsToCsv(plReports, plReports.get(0).getSymbol().toLowerCase()+"_report", false);
+
 
             out.println(transactionList);
 
