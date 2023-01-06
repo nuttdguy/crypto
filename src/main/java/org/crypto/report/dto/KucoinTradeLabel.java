@@ -1,4 +1,4 @@
-package org.crypto.report.upload;
+package org.crypto.report.dto;
 
 public enum KucoinTradeLabel {
 

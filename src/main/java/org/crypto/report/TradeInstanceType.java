@@ -3,7 +3,8 @@ package org.crypto.report;
 public enum TradeInstanceType {
 
     KUCOIN_SPOT_TRADE("kucoin_spot_trade_transaction"),
-    KUCOIN_FUTURE_TRADE("kucoin_future_trade_transaction");
+    KUCOIN_FUTURE_TRADE("kucoin_future_trade_transaction"),
+    BSC_DEFI_TRADE("bsc_defi_trade_transaction");
 
     public final String label;
 
@@ -12,3 +13,4 @@ public enum TradeInstanceType {
     }
 
 }
+

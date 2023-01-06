@@ -5,15 +5,17 @@ import org.crypto.bsc.account.TxListTransaction;
 import org.crypto.bsc.account.TxTokenTransaction;
 import org.crypto.quote.Quote;
 import org.crypto.report.TransactionEntry;
-import org.crypto.report.upload.KucoinSpotTradeTransaction;
-import org.crypto.report.upload.ProfitAndLossReport;
+import org.crypto.report.dto.BscDefiTradeLabel;
+import org.crypto.report.dto.BscDefiTradeTransaction;
+import org.crypto.report.dto.KucoinSpotTradeTransaction;
+import org.crypto.report.dto.ProfitAndLossReport;
 
 import java.util.Map;
 
-import static org.crypto.report.upload.KucoinTradeLabel.*;
-import static org.crypto.report.upload.KucoinTradeLabel.FEE_CURRENCY;
-import static org.crypto.util.DataTypeUtil.toDateTime;
-import static org.crypto.util.DataTypeUtil.toDouble;
+import static org.crypto.report.dto.BscDefiTradeLabel.*;
+import static org.crypto.report.dto.KucoinTradeLabel.*;
+import static org.crypto.report.dto.KucoinTradeLabel.FEE_CURRENCY;
+import static org.crypto.util.DataTypeUtil.*;
 
 public class ToMapper {
 
@@ -55,7 +57,7 @@ public class ToMapper {
                 .side(mapEntry.get(SIDE.label))
                 .orderType(mapEntry.get(ORDER_TYPE.label))
                 .avgFilledPrice(toDouble(mapEntry.get(AVG_FILLED_PRICE.label)))
-                .filledAmount(toDouble(mapEntry.get(FILLED_AMOUNT.label)))
+                .filledQty(toDouble(mapEntry.get(FILLED_AMOUNT.label)))
                 .filledVolume(toDouble(mapEntry.get(FILLED_VOLUME.label)))
                 .filledVolumeUsdt(toDouble(mapEntry.get(FILLED_VOLUME_USDT.label)))
                 .filledTime(toDateTime(mapEntry.get(FILLED_TIME.label)))
@@ -65,5 +67,25 @@ public class ToMapper {
                 .build();
     }
 
+    /* for creating a Bsc defi transaction */
+    public static BscDefiTradeTransaction toBscDefiTradeTransaction(Map<String, String> mapEntry) {
+        return BscDefiTradeTransaction.builder()
+                .hash(mapEntry.get(HASH.label))
+                .nonce(toInteger(mapEntry.get(NONCE.label)))
+                .blockNumber(toInteger(mapEntry.get(BLOCK_NUMBER.label)))
+                .txTokenContractAddress(mapEntry.get(CONTRACT_ADDRESS.label))
+                .txTokenFrom(mapEntry.get(FROM.label))
+                .txTokenTo(mapEntry.get(TO.label))
+                .txTokenName(mapEntry.get(TOKEN_NAME.label))
+                .txTokenSymbol(mapEntry.get(TOKEN_SYMBOL.label))
+                .txTokenDecimal(toInteger(mapEntry.get(TOKEN_DECIMAL.label)))
+                .txTokenValue(toDouble(mapEntry.get(VALUE.label)))
+                .txTokenGas(toDouble(mapEntry.get(GAS.label)))
+                .txTokenGasPrice(toDouble(mapEntry.get(GAS_PRICE.label)))
+                .txTokenGasUsed(toDouble(mapEntry.get(GAS_USED.label)))
+                .build();
+
+
+    }
 
 }

@@ -1,4 +1,4 @@
-package org.crypto.report.upload;
+package org.crypto.report.dto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +14,7 @@ public class KucoinSpotTradeTransaction extends Transaction {
     private double avgFilledPrice;
     private double fee;
     private String feeCurrency;
-    private double filledAmount;
+    private double filledQty;
     private LocalDateTime filledTime;
     private double filledVolume;
     private double filledVolumeUsdt;
@@ -30,7 +30,7 @@ public class KucoinSpotTradeTransaction extends Transaction {
                 this.avgFilledPrice + "," +
                 this.fee + "," +
                 this.feeCurrency + "," +
-                this.filledAmount + "," +
+                this.filledQty + "," +
                 this.filledTime + "," +
                 this.filledVolume + "," +
                 this.filledVolumeUsdt + "," +

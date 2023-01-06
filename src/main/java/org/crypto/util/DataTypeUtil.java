@@ -99,19 +99,19 @@ public class DataTypeUtil {
     }
 
     public static  Double toDouble(String value) {
-        return isDouble(value) ? Double.parseDouble(value) : 0.00;
+        return value != null && isDouble(value) ? Double.parseDouble(value) : 0.00;
     }
 
     public static Integer toInteger(String value) {
-        return isInt(value) ? Integer.parseInt(value) : 0;
+        return value != null && isInt(value) ? Integer.parseInt(value) : 0;
     }
 
     public static Float toFloat(String value) {
-        return isFloat(value) ? Float.parseFloat(value) : 0.00f;
+        return  value != null && isFloat(value) ? Float.parseFloat(value) : 0.00f;
     }
 
     public static Long toLong(String value) {
-        return isLong(value) ? Long.parseLong(value) : 0L;
+        return value != null && isLong(value) ? Long.parseLong(value) : 0L;
     }
 
     public static String[] toArrayFrom(JSONArray jsonArray) {

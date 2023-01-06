@@ -7,12 +7,18 @@ import org.crypto.bsc.account.TxTokenTransaction;
 import org.crypto.quote.Quote;
 import org.crypto.quote.QuoteConfig;
 import org.crypto.report.Report;
+import org.crypto.report.TradeInstanceType;
 import org.crypto.report.TransactionEntry;
+import org.crypto.report.dto.BscDefiTradeLabel;
+import org.crypto.report.dto.BscDefiTradeTransaction;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.System.out;
+import static org.crypto.report.dto.BscDefiTradeLabel.HASH;
+import static org.crypto.report.dto.BscDefiTradeLabel.VALUE;
 import static org.crypto.util.DataTypeUtil.*;
 
 
@@ -26,35 +32,73 @@ public class Main {
         // uploaded files
         executeReportMethods();
 
-
-        // generate single report file
-//        String fileName = "all_bsc_transactions.csv";
-//        List<String> files = List.of(
-//                "txlistinternal_transactions.csv",
-//                "tokentx_transactions.csv",
-//                "txlist_transactions.csv",
-//                "bnb_token_price_history.csv"
-//        );
-//
-//        List<String> fileContents = new ArrayList<>();
-
-//        try {
-//            fileContents = readFromFiles(files);
-//        } catch (IOException io) {
-//            io.printStackTrace();
-//        }
-
-
-
     }
 
     public static void executeReportMethods() {
         // to implement
         Report report = new Report();
 
+        // todo - pull info from all these files into a list of mapped entries or class objects
+        String[] bscFiles = new String[]{"tokentx_transactions.csv", "txlist_transactions.csv",  "bnb_token_price_history.csv"};
+        String[] keyPrefix = new String[]{"tx", "txList", "bnbPrice"};
+        int isSuccess = 0;
+
         // extract data from csv
-        int isSuccess = report.readFromFileAndThenWriteReports(
-                "2022_kucoin_spot_all.csv", "2022_summary_report");
+        if (false) {
+            isSuccess = report.readFromFileAndThenWriteReports(
+                    "2022_kucoin_spot_all.csv", "2022_summary_report");
+        }
+
+        String[] fields = new String[]{"txHash", "txListHash"};
+        Set<String> uniqueKeySet = new HashSet<>();
+        List<Map<String, String>> mappedEntries = new ArrayList<>();
+        List<BscDefiTradeTransaction> bscDefiTradeTransactions = new ArrayList<>();
+
+        if (true) {
+            int i = 0;
+            for (String file : bscFiles) {
+                try {
+                    List<String> fileContent = report.readTransactionsFrom(file);
+                    mappedEntries = report.mapToTransactionsFrom(fileContent, mappedEntries, keyPrefix[i]);
+
+                    // extract unique key sets
+                    uniqueKeySet = report.extractUniqueValuesFrom(fields, mappedEntries, uniqueKeySet);
+
+
+                    i++;
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            //
+            // merge transactions into a single record
+            List<Map<String, Map<String, String>>> combinedRecords = new ArrayList<>();
+            // merge map entry set; one address combines entries from tx an txlist file
+            for (String hash : uniqueKeySet) {
+                Map<String, String> mapEntry = new HashMap<>();
+                for (Map<String, String> entry : mappedEntries) {
+                    // extract from and to address
+                    if (entry.get(HASH.label) == null) {
+                        continue;
+                    }
+                    if (entry.get(HASH.label).equals(hash)) {
+                        // add transaction details from both lists
+                        mapEntry.put(hash, entry);
+                        // then continue -> to reduce iteration
+                    }
+                }
+                combinedRecords.add(mapEntry);
+            }
+
+            bscDefiTradeTransactions = report.createListOfTransactions(mappedEntries, TradeInstanceType.BSC_DEFI_TRADE);
+//            bscDefiTradeTransactions = report.createListOfTransactions(mappedEntries, TradeInstanceType.BSC_DEFI_TRADE);
+
+//            List<Map<String, String>> mappedEntries = report.mapToTransactionsFrom(bscTransactionList);
+
+        }
+
+
 
         out.println(isSuccess);
 

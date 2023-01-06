@@ -14,13 +14,16 @@ import static org.crypto.util.JsonUtil.toJsonObject;
 public interface IReportService {
 
     /* create a mapped entry from a header and file contents */
-    public List<Map<String, String>> createMappedEntriesFrom(String[] headerCol, String fileContent,String fRowDelimiter, String fColDelimiter);
+    public List<Map<String, String>> createMappedEntriesFrom(String[] headerCol, String fileContent, String fRowDelimiter, String fColDelimiter, String keyPrefix);
 
     /* form a list of mapped entries, create a transaction list */
     public <T extends Transaction> List<T> createTransactionsByFieldAndSymbol(String field, String tickerSymbol, List<Map<String, String>> mapEntries, TradeInstanceType tradeInstanceType);
 
-    /* creates a Transaction class instance from a mapped entry  */
+    /* creates a Single Transaction instance from a mapped entry  */
     public Transaction createTransactionInstance(Map<String, String> mapEntry, TradeInstanceType tradeInstanceType);
+
+    /* creates Many Transaction instances from a mapped entry  */
+    public <T extends Transaction> List<T> createTransactionInstance(List<Map<String, String>> mapEntries, TradeInstanceType tradeInstanceType);
 
     /* read from file and return a list of Transactions */
     public List<String> retrieveTransactionsFrom(String file) throws IOException;
@@ -31,4 +34,7 @@ public interface IReportService {
     public int writeTransactionsToCsv(List<Map<String, String>> mapEntries, String fileName, boolean append);
 
     public Set<String> extractUniqueValuesFrom(String field, List<Map<String, String>> mapEntries);
+
+    public Set<String> extractUniqueValuesFrom(String[] fields, List<Map<String, String>> mapEntries);
+
 }

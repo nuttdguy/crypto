@@ -1,4 +1,4 @@
-package org.crypto.report.upload;
+package org.crypto.report.dto;
 
 import lombok.Builder;
 import lombok.Getter;

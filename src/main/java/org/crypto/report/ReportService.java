@@ -1,11 +1,13 @@
 package org.crypto.report;
 
 import org.crypto.*;
+import org.crypto.report.dto.KucoinSpotTradeTransaction;
 
 import java.io.IOException;
 import java.util.*;
 
 import static java.lang.String.format;
+import static org.crypto.report.TradeInstanceType.BSC_DEFI_TRADE;
 import static org.crypto.report.TradeInstanceType.KUCOIN_SPOT_TRADE;
 
 
@@ -13,7 +15,7 @@ public class ReportService implements IReportService {
 
 
     @Override
-    public List<Map<String, String>> createMappedEntriesFrom(String[] headerCol, String fileContent, String fRowDelimiter, String fColDelimiter) {
+    public List<Map<String, String>> createMappedEntriesFrom(String[] headerCol, String fileContent, String fRowDelimiter, String fColDelimiter, String keyPrefix) {
         List<Map<String, String>> entries = new ArrayList<>();
 
         // iterate through each row entry
@@ -23,6 +25,8 @@ public class ReportService implements IReportService {
 
             int i = 0;
             for (String header : headerCol) {
+
+                header = keyPrefix + Character.toUpperCase(header.charAt(0)) + header.substring(1);
 
                 // map the header and field values for the current row
                 entry.putIfAbsent(header.trim(), content[i].trim());
@@ -60,7 +64,17 @@ public class ReportService implements IReportService {
         return hSet;
     }
 
-    /* from a mapped entry, create a Transaction Instance matching the instance type */
+    public Set<String> extractUniqueValuesFrom(String[] fields, List<Map<String, String>> mapEntries) {
+        Set<String> hSet = new HashSet<>();
+        for (Map<String, String> mapEntry : mapEntries) {
+            for (String field : fields) {
+                hSet.add(mapEntry.get(field));
+            }
+        }
+        return hSet;
+    }
+
+    /* from a mapped entry, create a SINGLE Transaction Instance matching the instance type */
     @Override
     public Transaction createTransactionInstance(Map<String, String> mapEntry, TradeInstanceType tradeInstanceType) {
 
@@ -72,6 +86,26 @@ public class ReportService implements IReportService {
 
         throw new RuntimeException(format("%s instance type is not supported", tradeInstanceType));
     }
+
+    /* creates Many Transaction instances from a mapped entry  */
+    @Override
+    public <T extends Transaction> List<T> createTransactionInstance(List<Map<String, String>> mapEntries, TradeInstanceType tradeInstanceType) {
+
+        List<T> transactions = new ArrayList<>();
+        for (Map<String, String> mapEntry: mapEntries) {
+            if (tradeInstanceType.equals(KUCOIN_SPOT_TRADE)) {
+                transactions.add((T) ToMapper.toKucoinSpotTradeTransaction(mapEntry));
+            } else if (tradeInstanceType.equals(BSC_DEFI_TRADE)) {
+                transactions.add((T) ToMapper.toBscDefiTradeTransaction(mapEntry));
+            } else {
+                throw new RuntimeException(format("%s instance type is not supported", tradeInstanceType));
+            }
+        }
+
+        return transactions;
+    }
+
+
 
     @Override
     /* read from file and return a list of Transactions */
